@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TestCraft Pro — Automation Practice Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #1a1d26;
+    --border: #252830;
+    --accent: #6ee7b7;
+    --accent2: #818cf8;
+    --accent3: #f472b6;
+    --text: #e8eaf0;
+    --text-muted: #6b7280;
+    --error: #f87171;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.5);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; gap: 8px;
+    padding: 0 24px; height: 60px;
+    background: rgba(10,12,16,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+  }
+  .nav-brand {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 20px;
+    color: var(--accent);
+    margin-right: auto;
+    letter-spacing: -0.5px;
+  }
+  .nav-brand span { color: var(--accent2); }
+  nav a {
+    font-size: 13px; font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none; background: none;
+  }
+  nav a:hover, nav a.active {
+    color: var(--text);
+    background: var(--surface2);
+  }
+  .nav-badge {
+    display: inline-flex; align-items: center;
+    background: var(--accent); color: #000;
+    font-size: 10px; font-weight: 700;
+    padding: 2px 7px; border-radius: 99px;
+    margin-left: 6px;
+  }
+
+  /* ── PAGES ── */
+  .page { display: none; animation: fadeIn 0.35s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+  /* ── HERO ── */
+  .hero {
+    position: relative;
+    padding: 80px 48px 60px;
+    overflow: hidden;
+    text-align: center;
+  }
+  .hero-glow {
+    position: absolute;
+    width: 600px; height: 300px;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+  .glow-1 { background: rgba(110,231,183,0.12); top:-100px; left:50%; transform:translateX(-60%); }
+  .glow-2 { background: rgba(129,140,248,0.1); top:-80px; right:-100px; }
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 5vw, 64px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -2px;
+    position: relative;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero p {
+    margin: 20px auto 40px;
+    max-width: 520px;
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1.7;
+    position: relative;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 12px 28px;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    cursor: pointer; border: none;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+  .btn-primary {
+    background: var(--accent); color: #000;
+  }
+  .btn-primary:hover { background: #5de0a5; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(110,231,183,0.3); }
+  .btn-secondary {
+    background: var(--surface2); color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--border); transform: translateY(-1px); }
+  .btn-danger { background: var(--error); color: #fff; }
+  .btn-danger:hover { opacity: 0.85; }
+  .btn-outline {
+    background: transparent; color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+  .btn-outline:hover { background: rgba(110,231,183,0.08); }
+  .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-title .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  /* ── GRID ── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px; font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .section-sub { color: var(--text-muted); font-size: 14px; margin-bottom: 28px; }
+  .section { margin-bottom: 48px; }
+
+  /* ── FORM ELEMENTS ── */
+  .form-group { margin-bottom: 20px; }
+  .form-group label {
+    display: block;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+  }
+  .form-group label .required { color: var(--error); margin-left: 3px; }
+  input[type="text"], input[type="email"], input[type="password"],
+  input[type="number"], input[type="tel"], input[type="date"],
+  input[type="time"], input[type="url"], input[type="search"],
+  select, textarea {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    transition: all 0.2s;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(110,231,183,0.12);
+  }
+  input.error { border-color: var(--error); }
+  input.success-field { border-color: var(--success); }
+  textarea { resize: vertical; min-height: 100px; }
+  select option { background: var(--surface2); }
+
+  /* ── CHECKBOX & RADIO ── */
+  .check-group { display: flex; flex-direction: column; gap: 12px; }
+  .check-item {
+    display: flex; align-items: center; gap: 12px;
+    cursor: pointer;
+  }
+  .check-item input[type="checkbox"],
+  .check-item input[type="radio"] {
+    width: 18px; height: 18px; flex-shrink: 0;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+  .check-item span { font-size: 14px; }
+
+  /* ── RANGE ── */
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%; height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    outline: none; border: none; padding: 0;
+    box-shadow: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    box-shadow: 0 0 0 3px rgba(110,231,183,0.2);
+  }
+
+  /* ── TOGGLE ── */
+  .toggle-group { display: flex; flex-direction: column; gap: 14px; }
+  .toggle-row {
+    display: flex; align-items: center;
+    justify-content: space-between;
+  }
+  .toggle-label { font-size: 14px; }
+  .toggle {
+    position: relative;
+    width: 44px; height: 24px;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute; inset: 0;
+    background: var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 18px; height: 18px;
+    left: 3px; top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider::after { transform: translateX(20px); }
+
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: var(--surface2); }
+  th {
+    padding: 14px 16px;
+    text-align: left;
+    font-size: 12px; font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 14px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(37,40,48,0.5);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+  .status-badge {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 99px;
+    font-size: 12px; font-weight: 500;
+    gap: 5px;
+  }
+  .badge-success { background: rgba(52,211,153,0.15); color: var(--success); }
+  .badge-warning { background: rgba(251,191,36,0.15); color: var(--warning); }
+  .badge-error { background: rgba(248,113,113,0.15); color: var(--error); }
+  .badge-info { background: rgba(129,140,248,0.15); color: var(--accent2); }
+
+  /* ── TABS ── */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .tab-btn {
+    padding: 10px 20px;
+    background: none; border: none;
+    color: var(--text-muted);
+    font-family: 'DM Sans'; font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+  .tab-pane { display: none; animation: fadeIn 0.25s ease; }
+  .tab-pane.active { display: block; }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    align-items: center; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    width: 90%; max-width: 480px;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.6);
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform:translateY(20px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .modal-title { font-family: 'Syne'; font-size: 18px; font-weight: 700; }
+  .modal-close {
+    background: var(--surface2); border: none;
+    width: 32px; height: 32px; border-radius: 8px;
+    color: var(--text-muted); font-size: 18px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { background: var(--border); color: var(--text); }
+  .modal-footer { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
+
+  /* ── ALERT / TOAST ── */
+  .alert {
+    padding: 14px 18px;
+    border-radius: 10px;
+    border-left: 4px solid;
+    margin-bottom: 14px;
+    display: flex; align-items: flex-start; gap: 12px;
+    font-size: 14px;
+  }
+  .alert-success { background: rgba(52,211,153,0.1); border-color: var(--success); }
+  .alert-warning { background: rgba(251,191,36,0.1); border-color: var(--warning); }
+  .alert-error { background: rgba(248,113,113,0.1); border-color: var(--error); }
+  .alert-info { background: rgba(129,140,248,0.1); border-color: var(--accent2); }
+
+  #toast-container {
+    position: fixed; top: 20px; right: 20px; z-index: 999;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .toast {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    min-width: 280px;
+    display: flex; align-items: center; gap: 12px;
+    box-shadow: var(--shadow);
+    animation: slideInRight 0.3s ease;
+    font-size: 14px;
+  }
+  @keyframes slideInRight { from { transform:translateX(100%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+  .toast-exit { animation: slideOutRight 0.3s ease forwards; }
+  @keyframes slideOutRight { to { transform:translateX(110%); opacity:0; } }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    height: 8px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.6s ease;
+  }
+
+  /* ── STEPPER ── */
+  .stepper {
+    display: flex; align-items: center;
+    margin-bottom: 32px;
+  }
+  .step {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 8px; flex: 1;
+    position: relative;
+  }
+  .step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 16px; left: calc(50% + 16px);
+    width: calc(100% - 32px); height: 2px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+  .step.done::after { background: var(--accent); }
+  .step-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600;
+    background: var(--surface2);
+    color: var(--text-muted);
+    transition: all 0.3s; z-index: 1;
+  }
+  .step.active .step-circle {
+    border-color: var(--accent); color: var(--accent);
+    box-shadow: 0 0 0 4px rgba(110,231,183,0.15);
+  }
+  .step.done .step-circle {
+    background: var(--accent); border-color: var(--accent);
+    color: #000;
+  }
+  .step-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  .step.active .step-label { color: var(--accent); }
+
+  /* ── ACCORDION ── */
+  .accordion { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .accordion-item { border-bottom: 1px solid var(--border); }
+  .accordion-item:last-child { border-bottom: none; }
+  .accordion-header {
+    padding: 16px 20px;
+    background: var(--surface2);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 14px; font-weight: 500;
+    user-select: none;
+    transition: background 0.2s;
+  }
+  .accordion-header:hover { background: var(--border); }
+  .accordion-arrow { transition: transform 0.25s; font-size: 12px; }
+  .accordion-header.open .accordion-arrow { transform: rotate(180deg); }
+  .accordion-body {
+    display: none;
+    padding: 16px 20px;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .accordion-body.open { display: block; animation: fadeIn 0.2s ease; }
+
+  /* ── TOOLTIP ── */
+  .tooltip-wrap { position: relative; display: inline-block; }
+  .tooltip-tip {
+    position: absolute; bottom: calc(100% + 8px);
+    left: 50%; transform: translateX(-50%);
+    background: var(--text); color: var(--bg);
+    padding: 6px 12px; border-radius: 6px;
+    font-size: 12px; white-space: nowrap;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.2s;
+    z-index: 10;
+  }
+  .tooltip-tip::after {
+    content: '';
+    position: absolute;
+    top: 100%; left: 50%; transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--text);
+  }
+  .tooltip-wrap:hover .tooltip-tip { opacity: 1; }
+
+  /* ── CHIP / TAG ── */
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .chip.selected {
+    background: rgba(110,231,183,0.15);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .chip:hover:not(.selected) { border-color: var(--text-muted); }
+
+  /* ── RATING ── */
+  .star-rating { display: flex; gap: 4px; }
+  .star {
+    font-size: 28px; cursor: pointer;
+    color: var(--border);
+    transition: color 0.15s, transform 0.15s;
+  }
+  .star.active { color: var(--warning); }
+  .star:hover { transform: scale(1.15); }
+
+  /* ── FILE UPLOAD ── */
+  .file-drop {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .file-drop:hover, .file-drop.drag-over {
+    border-color: var(--accent);
+    background: rgba(110,231,183,0.04);
+  }
+  .file-drop-icon { font-size: 40px; margin-bottom: 12px; }
+  .file-drop p { color: var(--text-muted); font-size: 14px; }
+  .file-drop strong { color: var(--accent); }
+
+  /* ── AVATAR ── */
+  .avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  /* ── STATS ── */
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  .stat-value {
+    font-family: 'Syne'; font-size: 36px; font-weight: 800;
+    line-height: 1;
+  }
+  .stat-label { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+  .stat-delta {
+    font-size: 12px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 3px;
+    margin-top: 8px;
+  }
+  .delta-up { color: var(--success); }
+  .delta-down { color: var(--error); }
+
+  /* ── CART BADGE ── */
+  .cart-icon { position: relative; cursor: pointer; }
+  .cart-count {
+    position: absolute; top: -8px; right: -8px;
+    background: var(--accent3);
+    color: #fff; font-size: 10px; font-weight: 700;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ── SEARCH BAR ── */
+  .search-wrap {
+    position: relative;
+  }
+  .search-wrap input { padding-left: 40px; }
+  .search-icon {
+    position: absolute; left: 14px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted); font-size: 16px;
+    pointer-events: none;
+  }
+  #search-results {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-top: 8px;
+    overflow: hidden;
+    display: none;
+  }
+  #search-results.open { display: block; }
+  .search-result-item {
+    padding: 12px 16px;
+    font-size: 14px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .search-result-item:last-child { border-bottom: none; }
+  .search-result-item:hover { background: var(--surface2); }
+  .search-result-item .result-cat { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── PAGINATION ── */
+  .pagination { display: flex; align-items: center; gap: 6px; }
+  .page-btn {
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 14px; font-weight: 500;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .page-btn.active {
+    background: var(--accent); color: #000;
+    border-color: var(--accent);
+  }
+  .page-btn:hover:not(.active) { border-color: var(--text-muted); color: var(--text); }
+
+  /* ── SIDEBAR LAYOUT ── */
+  .layout-sidebar {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  .sidebar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    position: sticky; top: 80px;
+  }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    border: none; background: none; width: 100%;
+    text-align: left;
+  }
+  .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-item.active { background: rgba(110,231,183,0.1); color: var(--accent); }
+  .sidebar-section { font-size: 11px; font-weight: 700; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; padding: 12px 12px 6px; margin-top: 8px; }
+
+  /* ── PRODUCT CARD ── */
+  .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+  .product-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .product-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.4); }
+  .product-img {
+    height: 140px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 56px;
+  }
+  .product-info { padding: 16px; }
+  .product-name { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .product-price { color: var(--accent); font-family: 'JetBrains Mono'; font-size: 15px; font-weight: 500; }
+  .product-old { color: var(--text-muted); text-decoration: line-through; font-size: 12px; margin-left: 6px; }
+
+  /* ── CALENDAR ── */
+  .calendar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .cal-nav { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; cursor: pointer; color: var(--text); font-size: 16px; transition: background 0.2s; }
+  .cal-nav:hover { background: var(--border); }
+  .cal-month { font-family: 'Syne'; font-size: 16px; font-weight: 700; }
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+  .cal-day-header { text-align: center; font-size: 11px; font-weight: 600; color: var(--text-muted); padding: 8px 0; letter-spacing: 0.5px; }
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .cal-day:hover { background: var(--surface2); }
+  .cal-day.today { background: var(--accent); color: #000; font-weight: 700; }
+  .cal-day.selected { background: var(--accent2); color: #fff; }
+  .cal-day.other-month { color: var(--border); }
+
+  /* ── NOTIFICATION BELL ── */
+  .notif-panel {
+    position: absolute; top: 100%; right: 0;
+    width: 320px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    z-index: 50;
+    display: none;
+    overflow: hidden;
+  }
+  .notif-panel.open { display: block; animation: fadeIn 0.2s ease; }
+  .notif-header { padding: 14px 16px; border-bottom: 1px solid var(--border); font-weight: 600; font-size: 14px; display: flex; justify-content: space-between; }
+  .notif-item { padding: 14px 16px; border-bottom: 1px solid rgba(37,40,48,0.5); display: flex; gap: 12px; cursor: pointer; transition: background 0.15s; }
+  .notif-item:hover { background: var(--surface2); }
+  .notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 4px; }
+  .notif-text { font-size: 13px; line-height: 1.5; }
+  .notif-time { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+
+  /* ── COLOR PICKER ── */
+  input[type="color"] {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 2px;
+    background: var(--surface2);
+    cursor: pointer;
+  }
+
+  /* ── CODE BLOCK ── */
+  .code-block {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    font-family: 'JetBrains Mono';
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: auto;
+    position: relative;
+  }
+  .code-copy {
+    position: absolute; top: 12px; right: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 5px 10px;
+    font-size: 12px; cursor: pointer; color: var(--text-muted);
+    transition: all 0.2s;
+  }
+  .code-copy:hover { color: var(--text); }
+
+  /* ── MISC ── */
+  .divider { height: 1px; background: var(--border); margin: 24px 0; }
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+  .tag-green { background: rgba(52,211,153,0.15); color: var(--success); }
+  .tag-blue { background: rgba(129,140,248,0.15); color: var(--accent2); }
+  .tag-pink { background: rgba(244,114,182,0.15); color: var(--accent3); }
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .gap-2 { gap: 8px; }
+  .gap-3 { gap: 12px; }
+  .gap-4 { gap: 16px; }
+  .mt-2 { margin-top: 8px; }
+  .mt-3 { margin-top: 12px; }
+  .mt-4 { margin-top: 16px; }
+  .mb-3 { margin-bottom: 12px; }
+  .text-muted { color: var(--text-muted); }
+  .text-sm { font-size: 13px; }
+  .font-mono { font-family: 'JetBrains Mono'; }
+  .w-full { width: 100%; }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .layout-sidebar { grid-template-columns: 1fr; }
+    .hero { padding: 48px 24px 40px; }
+    nav a { display: none; }
+    nav a.always-show { display: flex; }
+  }
+</style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <div class="nav-brand">Test<span>Craft</span> Pro</div>
+  <a onclick="showPage('home')" class="active always-show" data-page="home">🏠 Home</a>
+  <a onclick="showPage('forms')" data-page="forms">📝 Forms</a>
+  <a onclick="showPage('components')" data-page="components">🧩 Components</a>
+  <a onclick="showPage('tables')" data-page="tables">📊 Tables</a>
+  <a onclick="showPage('shop')" data-page="shop">🛍 Shop <span class="nav-badge" id="cart-badge">0</span></a>
+  <a onclick="showPage('checkout')" data-page="checkout">💳 Checkout</a>
+  <a onclick="showPage('dashboard')" data-page="dashboard">📈 Dashboard</a>
+
+  <!-- Notification Bell -->
+  <div style="position:relative; margin-left:8px;">
+    <button onclick="toggleNotif()" id="notif-btn" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 11px;cursor:pointer;color:var(--text);font-size:16px;position:relative;">
+      🔔
+      <span style="position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--accent3);display:block;"></span>
+    </button>
+    <div class="notif-panel" id="notif-panel">
+      <div class="notif-header"><span>Notifications</span><span style="color:var(--accent);font-size:12px;cursor:pointer;" onclick="markAllRead()">Mark all read</span></div>
+      <div class="notif-item"><div class="notif-dot"></div><div><div class="notif-text">New test case added to your suite</div><div class="notif-time">2 min ago</div></div></div>
+      <div class="notif-item"><div class="notif-dot"></div><div><div class="notif-text">Build #47 passed successfully ✓</div><div class="notif-time">15 min ago</div></div></div>
+      <div class="notif-item" style="opacity:0.5"><div style="width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;margin-top:4px;"></div><div><div class="notif-text">Scheduled maintenance tonight at 2AM</div><div class="notif-time">1 hour ago</div></div></div>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE: HOME -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-glow glow-1"></div>
+    <div class="hero-glow glow-2"></div>
+    <h1>Your Ultimate<br><em>Automation Practice</em> Hub</h1>
+    <p>Every component you need to master Testsigma automation — forms, tables, modals, shops, dashboards and more — all in one beautiful app.</p>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;">
+      <button class="btn btn-primary" onclick="showPage('forms')">Start with Forms →</button>
+      <button class="btn btn-secondary" onclick="showPage('components')">Explore Components</button>
+      <button class="btn btn-outline" onclick="showPage('dashboard')">View Dashboard</button>
+    </div>
+  </div>
+
+  <div class="container">
+    <!-- Quick stats -->
+    <div class="grid-3 mb-3 mt-2" style="margin-bottom:40px">
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--accent)">24</div>
+        <div class="stat-label">Components to Test</div>
+        <div class="stat-delta delta-up">↑ 8 new this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--accent2)">6</div>
+        <div class="stat-label">Practice Pages</div>
+        <div class="stat-delta delta-up">↑ Full E2E flows</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:var(--accent3)">∞</div>
+        <div class="stat-label">Test Scenarios</div>
+        <div class="stat-delta delta-up">↑ Real interactions</div>
+      </div>
+    </div>
+
+    <!-- Feature cards -->
+    <div class="section">
+      <div class="section-title">What can you practice?</div>
+      <div class="section-sub">Click any card to jump to that section</div>
+      <div class="grid-3">
+        <div class="card" style="cursor:pointer;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow=''" onclick="showPage('forms')">
+          <div style="font-size:32px;margin-bottom:12px">📝</div>
+          <div style="font-family:'Syne';font-weight:700;font-size:15px;margin-bottom:8px">Forms & Inputs</div>
+          <div style="color:var(--text-muted);font-size:13px;line-height:1.6">Text, email, password, dropdowns, checkboxes, radio buttons, date pickers, file upload, multi-step wizards.</div>
+          <div class="mt-3"><span class="tag tag-green">Registration</span> <span class="tag tag-blue">Login</span></div>
+        </div>
+        <div class="card" style="cursor:pointer;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow=''" onclick="showPage('components')">
+          <div style="font-size:32px;margin-bottom:12px">🧩</div>
+          <div style="font-family:'Syne';font-weight:700;font-size:15px;margin-bottom:8px">UI Components</div>
+          <div style="color:var(--text-muted);font-size:13px;line-height:1.6">Modals, tabs, accordions, tooltips, alerts, toasts, chips, pagination, calendar, ratings.</div>
+          <div class="mt-3"><span class="tag tag-pink">Interactions</span> <span class="tag tag-blue">Popups</span></div>
+        </div>
+        <div class="card" style="cursor:pointer;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow=''" onclick="showPage('tables')">
+          <div style="font-size:32px;margin-bottom:12px">📊</div>
+          <div style="font-family:'Syne';font-weight:700;font-size:15px;margin-bottom:8px">Tables & Data</div>
+          <div style="color:var(--text-muted);font-size:13px;line-height:1.6">Sortable tables, search & filter, pagination, bulk actions, inline editing, CSV export.</div>
+          <div class="mt-3"><span class="tag tag-green">CRUD</span> <span class="tag tag-blue">Sort & Filter</span></div>
+        </div>
+        <div class="card" style="cursor:pointer;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow=''" onclick="showPage('shop')">
+          <div style="font-size:32px;margin-bottom:12px">🛍</div>
+          <div style="font-family:'Syne';font-weight:700;font-size:15px;margin-bottom:8px">E-Commerce Shop</div>
+          <div style="color:var(--text-muted);font-size:13px;line-height:1.6">Product listing, add to cart, cart management, coupon codes, checkout flow.</div>
+          <div class="mt-3"><span class="tag tag-pink">Cart</span> <span class="tag tag-green">Checkout</span></div>
+        </div>
+        <div class="card" style="cursor:pointer;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow=''" onclick="showPage('checkout')">
+          <div style="font-size:32px;margin-bottom:12px">💳</div>
+          <div style="font-family:'Syne';font-weight:700;font-size:15px;margin-bottom:8px">Payment Checkout</div>
+          <div style="color:var(--text-muted);font-size:13px;line-height:1.6">Multi-step checkout, address form, payment form with card validation, order confirmation.</div>
+          <div class="mt-3"><span class="tag tag-blue">Stepper</span> <span class="tag tag-green">Validation</span></div>
+        </div>
+        <div class="card" style="cursor:pointer;transition:transform 0.2s,box-shadow 0.2s" onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.4)'" onmouseout="this.style.transform='';this.style.boxShadow=''" onclick="showPage('dashboard')">
+          <div style="font-size:32px;margin-bottom:12px">📈</div>
+          <div style="font-family:'Syne';font-weight:700;font-size:15px;margin-bottom:8px">Dashboard</div>
+          <div style="color:var(--text-muted);font-size:13px;line-height:1.6">Charts, KPI cards, sidebar navigation, data visualization, activity feed, filters.</div>
+          <div class="mt-3"><span class="tag tag-pink">Analytics</span> <span class="tag tag-blue">Charts</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE: FORMS -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-forms">
+  <div class="container" style="padding-top:40px">
+    <div class="section-title">📝 Forms & Input Elements</div>
+    <div class="section-sub">All types of form elements for comprehensive automation practice</div>
+
+    <!-- TABS for different forms -->
+    <div class="tabs" id="form-tabs">
+      <button class="tab-btn active" onclick="switchTab('form-tabs','form-register',this)">Registration</button>
+      <button class="tab-btn" onclick="switchTab('form-tabs','form-login',this)">Login</button>
+      <button class="tab-btn" onclick="switchTab('form-tabs','form-profile',this)">Profile</button>
+      <button class="tab-btn" onclick="switchTab('form-tabs','form-advanced',this)">Advanced Inputs</button>
+    </div>
+
+    <!-- REGISTRATION FORM -->
+    <div class="tab-pane active" id="form-register">
+      <div class="grid-2" style="gap:32px;align-items:start">
+        <div>
+          <div class="card">
+            <div class="card-title"><div class="icon" style="background:rgba(110,231,183,0.15)">✍️</div>Create Account</div>
+            <div class="form-group">
+              <label>First Name <span class="required">*</span></label>
+              <input type="text" id="reg-fname" placeholder="John" data-testid="first-name">
+            </div>
+            <div class="form-group">
+              <label>Last Name <span class="required">*</span></label>
+              <input type="text" id="reg-lname" placeholder="Doe" data-testid="last-name">
+            </div>
+            <div class="form-group">
+              <label>Email Address <span class="required">*</span></label>
+              <input type="email" id="reg-email" placeholder="john@example.com" data-testid="email">
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="reg-phone" placeholder="+1 (555) 000-0000" data-testid="phone">
+            </div>
+            <div class="form-group">
+              <label>Password <span class="required">*</span></label>
+              <div style="position:relative">
+                <input type="password" id="reg-pass" placeholder="Min 8 characters" data-testid="password">
+                <button onclick="togglePass('reg-pass',this)" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;">👁</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Confirm Password <span class="required">*</span></label>
+              <input type="password" id="reg-cpass" placeholder="Repeat password" data-testid="confirm-password">
+            </div>
+            <div class="form-group">
+              <label>Country</label>
+              <select id="reg-country" data-testid="country">
+                <option value="">Select country...</option>
+                <option value="in">India</option>
+                <option value="us">United States</option>
+                <option value="uk">United Kingdom</option>
+                <option value="ca">Canada</option>
+                <option value="au">Australia</option>
+                <option value="de">Germany</option>
+                <option value="fr">France</option>
+                <option value="sg">Singapore</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Role</label>
+              <div class="check-group" style="flex-direction:row;flex-wrap:wrap;gap:16px">
+                <label class="check-item"><input type="radio" name="role" value="qa" data-testid="role-qa"> <span>QA Engineer</span></label>
+                <label class="check-item"><input type="radio" name="role" value="dev" data-testid="role-dev"> <span>Developer</span></label>
+                <label class="check-item"><input type="radio" name="role" value="pm" data-testid="role-pm"> <span>Product Manager</span></label>
+              </div>
+            </div>
+            <div class="form-group">
+              <div class="check-group">
+                <label class="check-item"><input type="checkbox" id="reg-terms" data-testid="terms"> <span>I agree to the <a href="#" style="color:var(--accent)">Terms of Service</a> and <a href="#" style="color:var(--accent)">Privacy Policy</a></span></label>
+                <label class="check-item"><input type="checkbox" id="reg-newsletter" data-testid="newsletter"> <span>Subscribe to newsletter</span></label>
+              </div>
+            </div>
+            <div id="reg-error" class="alert alert-error" style="display:none">❌ <span id="reg-error-msg"></span></div>
+            <div id="reg-success" class="alert alert-success" style="display:none">✅ Account created successfully! Redirecting to login...</div>
+            <button class="btn btn-primary w-full" onclick="submitRegistration()" data-testid="register-btn" style="margin-top:8px">Create Account →</button>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:20px">
+            <div class="card-title"><div class="icon" style="background:rgba(129,140,248,0.15)">🧪</div>Test IDs Reference</div>
+            <div class="code-block" style="font-size:12px">
+<span style="color:var(--accent)">data-testid</span> attributes:<br>
+<span style="color:var(--text-muted)">→</span> first-name, last-name<br>
+<span style="color:var(--text-muted)">→</span> email, phone, password<br>
+<span style="color:var(--text-muted)">→</span> confirm-password, country<br>
+<span style="color:var(--text-muted)">→</span> role-qa, role-dev, role-pm<br>
+<span style="color:var(--text-muted)">→</span> terms, newsletter<br>
+<span style="color:var(--text-muted)">→</span> register-btn
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title"><div class="icon" style="background:rgba(244,114,182,0.15)">📋</div>Test Scenarios</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:13px"><span style="color:var(--warning)">▶</span> Register with valid data</div>
+              <div style="padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:13px"><span style="color:var(--warning)">▶</span> Submit empty form (validation)</div>
+              <div style="padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:13px"><span style="color:var(--warning)">▶</span> Invalid email format</div>
+              <div style="padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:13px"><span style="color:var(--warning)">▶</span> Password mismatch</div>
+              <div style="padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:13px"><span style="color:var(--warning)">▶</span> Toggle password visibility</div>
+              <div style="padding:10px 14px;background:var(--surface2);border-radius:8px;font-size:13px"><span style="color:var(--warning)">▶</span> Select country from dropdown</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOGIN FORM -->
+    <div class="tab-pane" id="form-login">
+      <div style="max-width:420px;margin:0 auto">
+        <div class="card">
+          <div style="text-align:center;margin-bottom:24px">
+            <div style="font-size:40px;margin-bottom:12px">🔐</div>
+            <div style="font-family:'Syne';font-size:22px;font-weight:700">Welcome back</div>
+            <div style="color:var(--text-muted);font-size:14px;margin-top:6px">Sign in to your account</div>
+          </div>
+          <!-- Social login -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+            <button class="btn btn-secondary" onclick="showToast('Google OAuth flow initiated','info')" data-testid="google-login" style="justify-content:center">🔵 Google</button>
+            <button class="btn btn-secondary" onclick="showToast('GitHub OAuth flow initiated','info')" data-testid="github-login" style="justify-content:center">⚫ GitHub</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+            <span style="color:var(--text-muted);font-size:12px">or continue with email</span>
+            <div style="flex:1;height:1px;background:var(--border)"></div>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="login-email" placeholder="Enter your email" data-testid="login-email" value="">
+          </div>
+          <div class="form-group">
+            <label>Password <a href="#" style="float:right;color:var(--accent);font-size:12px" onclick="showForgotModal()">Forgot password?</a></label>
+            <input type="password" id="login-pass" placeholder="Enter your password" data-testid="login-password">
+          </div>
+          <div class="form-group">
+            <label class="check-item"><input type="checkbox" id="remember-me" data-testid="remember-me"> <span style="font-size:14px">Remember me for 30 days</span></label>
+          </div>
+          <div id="login-error" class="alert alert-error" style="display:none">❌ Invalid email or password. Try: <strong>test@example.com / Test@1234</strong></div>
+          <button class="btn btn-primary w-full" onclick="submitLogin()" data-testid="login-btn" style="margin-bottom:16px">Sign In →</button>
+          <div style="text-align:center;font-size:14px;color:var(--text-muted)">Don't have an account? <a href="#" style="color:var(--accent)" onclick="switchTab('form-tabs','form-register',document.querySelector('#form-tabs .tab-btn'))">Sign up</a></div>
+
+          <div class="divider"></div>
+          <div style="background:var(--surface2);border-radius:8px;padding:12px;font-size:13px;color:var(--text-muted)">
+            <strong style="color:var(--accent)">Test Credentials:</strong><br>
+            Email: test@example.com<br>
+            Password: Test@1234
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE FORM -->
+    <div class="tab-pane" id="form-profile">
+      <div class="grid-2" style="gap:24px;align-items:start">
+        <div>
+          <div class="card" style="margin-bottom:20px">
+            <div class="card-title"><div class="icon" style="background:rgba(110,231,183,0.15)">👤</div>Personal Info</div>
+            <div class="form-group">
+              <label>Display Name</label>
+              <input type="text" id="prof-name" placeholder="John Doe" value="Jane Smith" data-testid="display-name">
+            </div>
+            <div class="form-group">
+              <label>Bio</label>
+              <textarea id="prof-bio" placeholder="Tell us about yourself..." data-testid="bio" rows="3">Senior QA Engineer at TestCorp. Passionate about test automation.</textarea>
+            </div>
+            <div class="form-group">
+              <label>Website URL</label>
+              <input type="url" id="prof-url" placeholder="https://yoursite.com" data-testid="website">
+            </div>
+            <div class="form-group">
+              <label>Date of Birth</label>
+              <input type="date" id="prof-dob" data-testid="dob">
+            </div>
+            <div class="form-group">
+              <label>Gender</label>
+              <select id="prof-gender" data-testid="gender">
+                <option value="">Prefer not to say</option>
+                <option value="m">Male</option>
+                <option value="f">Female</option>
+                <option value="nb">Non-binary</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Profile Color</label>
+              <div style="display:flex;gap:12px;align-items:center">
+                <input type="color" id="prof-color" value="#6ee7b7" data-testid="profile-color">
+                <span style="font-size:13px;color:var(--text-muted)">Choose your accent color</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Notifications</label>
+              <div class="toggle-group">
+                <div class="toggle-row"><span class="toggle-label">Email notifications</span><label class="toggle"><input type="checkbox" id="notif-email" checked data-testid="notif-email"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><span class="toggle-label">Push notifications</span><label class="toggle"><input type="checkbox" id="notif-push" data-testid="notif-push"><span class="toggle-slider"></span></label></div>
+                <div class="toggle-row"><span class="toggle-label">Weekly digest</span><label class="toggle"><input type="checkbox" id="notif-digest" checked data-testid="notif-digest"><span class="toggle-slider"></span></label></div>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:8px">
+              <button class="btn btn-primary" onclick="saveProfile()" data-testid="save-profile">Save Changes</button>
+              <button class="btn btn-secondary" onclick="showToast('Changes discarded','warning')" data-testid="discard-profile">Discard</button>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:20px">
+            <div class="card-title"><div class="icon" style="background:rgba(244,114,182,0.15)">🔒</div>Change Password</div>
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" placeholder="••••••••" data-testid="current-pass">
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="new-pass" placeholder="Min 8 characters" data-testid="new-pass">
+            </div>
+            <div class="form-group">
+              <label>Confirm New Password</label>
+              <input type="password" id="confirm-new-pass" placeholder="Repeat new password" data-testid="confirm-new-pass">
+            </div>
+            <div class="form-group">
+              <label>Password Strength</label>
+              <div class="progress-bar"><div class="progress-fill" id="pass-strength" style="width:0%"></div></div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:6px" id="pass-strength-label">Enter a password</div>
+            </div>
+            <button class="btn btn-outline" onclick="showToast('Password changed successfully!','success')" data-testid="change-pass-btn">Update Password</button>
+          </div>
+          <div class="card">
+            <div class="card-title"><div class="icon" style="background:rgba(248,113,113,0.15)">⚠️</div>Danger Zone</div>
+            <div style="font-size:14px;color:var(--text-muted);margin-bottom:16px">These actions are irreversible. Proceed with caution.</div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <button class="btn btn-secondary" onclick="openModal('deactivate-modal')" data-testid="deactivate-btn">Deactivate Account</button>
+              <button class="btn btn-danger" onclick="openModal('delete-modal')" data-testid="delete-btn">Delete Account</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADVANCED INPUTS -->
+    <div class="tab-pane" id="form-advanced">
+      <div class="grid-2" style="gap:24px">
+        <div class="card">
+          <div class="card-title"><div class="icon" style="background:rgba(129,140,248,0.15)">🎛</div>Sliders & Ranges</div>
+          <div class="form-group">
+            <label>Volume: <span id="vol-val" style="color:var(--accent)">50</span>%</label>
+            <input type="range" id="vol-slider" min="0" max="100" value="50" data-testid="volume-slider" oninput="document.getElementById('vol-val').textContent=this.value">
+          </div>
+          <div class="form-group">
+            <label>Price Range: $<span id="price-val" style="color:var(--accent)">250</span></label>
+            <input type="range" id="price-slider" min="0" max="1000" value="250" step="10" data-testid="price-slider" oninput="document.getElementById('price-val').textContent=this.value">
+          </div>
+          <div class="form-group">
+            <label>Rating: <span id="rating-val" style="color:var(--accent)">3</span>/5</label>
+            <input type="range" id="rating-slider" min="1" max="5" value="3" data-testid="rating-slider" oninput="document.getElementById('rating-val').textContent=this.value">
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="icon" style="background:rgba(110,231,183,0.15)">📅</div>Date & Time</div>
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" data-testid="adv-date">
+          </div>
+          <div class="form-group">
+            <label>Time</label>
+            <input type="time" data-testid="adv-time">
+          </div>
+          <div class="form-group">
+            <label>Search</label>
+            <div class="search-wrap">
+              <span class="search-icon">🔍</span>
+              <input type="search" id="adv-search" placeholder="Search anything..." data-testid="adv-search" oninput="handleSearch(this.value)" autocomplete="off">
+            </div>
+            <div id="search-results">
+              <div class="search-result-item" onclick="selectSearch('Test automation basics')">Test automation basics<div class="result-cat">📚 Article</div></div>
+              <div class="search-result-item" onclick="selectSearch('Testsigma tutorials')">Testsigma tutorials<div class="result-cat">🎥 Video</div></div>
+              <div class="search-result-item" onclick="selectSearch('Test case writing')">Test case writing<div class="result-cat">📝 Guide</div></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Number</label>
+            <input type="number" min="0" max="100" step="5" value="25" placeholder="0-100" data-testid="adv-number">
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="icon" style="background:rgba(244,114,182,0.15)">⬆️</div>File Upload</div>
+          <div class="file-drop" id="file-drop" onclick="document.getElementById('file-input').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleFileDrop(event)" data-testid="file-drop">
+            <div class="file-drop-icon">📂</div>
+            <p><strong>Click to upload</strong> or drag & drop</p>
+            <p style="margin-top:6px;font-size:12px">PNG, JPG, PDF up to 10MB</p>
+          </div>
+          <input type="file" id="file-input" style="display:none" data-testid="file-input" onchange="handleFileSelect(this)">
+          <div id="file-list" style="margin-top:12px;display:flex;flex-direction:column;gap:8px"></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><div class="icon" style="background:rgba(110,231,183,0.15)">🏷</div>Tags / Multi-select</div>
+          <div class="form-group">
+            <label>Select Skills</label>
+            <div class="chip-group" id="skill-chips">
+              <div class="chip" onclick="toggleChip(this)" data-testid="chip-selenium">Selenium</div>
+              <div class="chip selected" onclick="toggleChip(this)" data-testid="chip-testsigma">Testsigma</div>
+              <div class="chip" onclick="toggleChip(this)" data-testid="chip-appium">Appium</div>
+              <div class="chip" onclick="toggleChip(this)" data-testid="chip-cypress">Cypress</div>
+              <div class="chip" onclick="toggleChip(this)" data-testid="chip-playwright">Playwright</div>
+              <div class="chip selected" onclick="toggleChip(this)" data-testid="chip-api">API Testing</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Star Rating</label>
+            <div class="star-rating" id="star-rating" data-testid="star-rating">
+              <span class="star" onclick="setRating(1)" data-testid="star-1">★</span>
+              <span class="star" onclick="setRating(2)" data-testid="star-2">★</span>
+              <span class="star active" onclick="setRating(3)" data-testid="star-3">★</span>
+              <span class="star active" onclick="setRating(4)" data-testid="star-4">★</span>
+              <span class="star" onclick="setRating(5)" data-testid="star-5">★</span>
+            </div>
+            <div id="rating-text" style="font-size:13px;color:var(--text-muted);margin-top:8px">4 out of 5 stars</div>
+          </div>
+          <div class="form-group">
+            <label>Multi-select Dropdown</label>
+            <select multiple data-testid="multi-select" style="height:100px">
+              <option value="ui">UI Testing</option>
+              <option value="api">API Testing</option>
+              <option value="perf">Performance</option>
+              <option value="sec">Security</option>
+              <option value="mobile">Mobile</option>
+            </select>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Hold Ctrl/Cmd to select multiple</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE: COMPONENTS -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-components">
+  <div class="container" style="padding-top:40px">
+    <div class="section-title">🧩 UI Components</div>
+    <div class="section-sub">Interactive components for automation practice</div>
+
+    <div class="grid-2" style="gap:24px">
+
+      <!-- MODALS -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(129,140,248,0.15)">🪟</div>Modals & Dialogs</div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px">
+          <button class="btn btn-secondary btn-sm" onclick="openModal('info-modal')" data-testid="open-info-modal">Info Modal</button>
+          <button class="btn btn-secondary btn-sm" onclick="openModal('confirm-modal')" data-testid="open-confirm-modal">Confirm Dialog</button>
+          <button class="btn btn-secondary btn-sm" onclick="openModal('form-modal')" data-testid="open-form-modal">Form Modal</button>
+          <button class="btn btn-danger btn-sm" onclick="openModal('delete-modal')" data-testid="open-delete-modal">Delete Confirm</button>
+        </div>
+      </div>
+
+      <!-- TABS -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(110,231,183,0.15)">📑</div>Tabs</div>
+        <div class="tabs" id="comp-tabs" style="margin-bottom:16px">
+          <button class="tab-btn active" onclick="switchTab('comp-tabs','comp-tab1',this)" data-testid="tab-overview">Overview</button>
+          <button class="tab-btn" onclick="switchTab('comp-tabs','comp-tab2',this)" data-testid="tab-details">Details</button>
+          <button class="tab-btn" onclick="switchTab('comp-tabs','comp-tab3',this)" data-testid="tab-settings">Settings</button>
+        </div>
+        <div class="tab-pane active" id="comp-tab1"><p style="font-size:14px;color:var(--text-muted)">This is the <strong style="color:var(--text)">Overview</strong> tab content. Tabs are great for organizing related content into discrete sections.</p></div>
+        <div class="tab-pane" id="comp-tab2"><p style="font-size:14px;color:var(--text-muted)">This is the <strong style="color:var(--text)">Details</strong> tab with more information. You can test switching between tabs.</p></div>
+        <div class="tab-pane" id="comp-tab3"><p style="font-size:14px;color:var(--text-muted)"><strong style="color:var(--text)">Settings</strong> tab content. Practice clicking tabs and verifying content changes.</p></div>
+      </div>
+
+      <!-- ACCORDION -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(244,114,182,0.15)">🪗</div>Accordion</div>
+        <div class="accordion" data-testid="accordion">
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)" data-testid="acc-header-1">What is Testsigma? <span class="accordion-arrow">▾</span></div>
+            <div class="accordion-body">Testsigma is a cloud-based test automation platform that enables QA teams to write, run, and manage tests using plain English or code, supporting web, mobile, and API testing.</div>
+          </div>
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)" data-testid="acc-header-2">How does automation work? <span class="accordion-arrow">▾</span></div>
+            <div class="accordion-body">Automation testing uses scripts to execute test cases automatically. Tools like Testsigma record and replay user actions, compare outcomes to expected results, and generate reports.</div>
+          </div>
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)" data-testid="acc-header-3">What browsers are supported? <span class="accordion-arrow">▾</span></div>
+            <div class="accordion-body">TestCraft Pro supports Chrome, Firefox, Safari, and Edge. All interactive elements are cross-browser compatible and include proper accessibility attributes.</div>
+          </div>
+          <div class="accordion-item">
+            <div class="accordion-header" onclick="toggleAccordion(this)" data-testid="acc-header-4">Can I run parallel tests? <span class="accordion-arrow">▾</span></div>
+            <div class="accordion-body">Yes! Testsigma supports parallel execution across multiple browsers and devices simultaneously, dramatically reducing test execution time.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALERTS & TOASTS -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(110,231,183,0.15)">🔔</div>Alerts & Toasts</div>
+        <div class="alert alert-success">✅ <div><strong>Success!</strong> Your test case ran successfully.</div></div>
+        <div class="alert alert-warning">⚠️ <div><strong>Warning!</strong> This action cannot be undone.</div></div>
+        <div class="alert alert-error">❌ <div><strong>Error!</strong> Failed to connect to test environment.</div></div>
+        <div class="alert alert-info">ℹ️ <div><strong>Info:</strong> Tests are scheduled for tonight at midnight.</div></div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:8px">
+          <button class="btn btn-sm" style="background:rgba(52,211,153,0.15);color:var(--success);border:1px solid var(--success)" onclick="showToast('Test passed! ✓','success')" data-testid="toast-success">Success Toast</button>
+          <button class="btn btn-sm" style="background:rgba(248,113,113,0.15);color:var(--error);border:1px solid var(--error)" onclick="showToast('Test failed! ✗','error')" data-testid="toast-error">Error Toast</button>
+          <button class="btn btn-sm" style="background:rgba(251,191,36,0.15);color:var(--warning);border:1px solid var(--warning)" onclick="showToast('Build in progress...','warning')" data-testid="toast-warning">Warning Toast</button>
+          <button class="btn btn-sm" style="background:rgba(129,140,248,0.15);color:var(--accent2);border:1px solid var(--accent2)" onclick="showToast('Syncing data...','info')" data-testid="toast-info">Info Toast</button>
+        </div>
+      </div>
+
+      <!-- TOOLTIPS & BADGES -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(129,140,248,0.15)">💬</div>Tooltips & Badges</div>
+        <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:20px">
+          <div class="tooltip-wrap" data-testid="tooltip-1">
+            <button class="btn btn-secondary btn-sm">Hover me ✨</button>
+            <div class="tooltip-tip">This is a helpful tooltip!</div>
+          </div>
+          <div class="tooltip-wrap" data-testid="tooltip-2">
+            <button class="btn btn-outline btn-sm">More info ℹ️</button>
+            <div class="tooltip-tip">Shows additional context on hover</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+          <span class="status-badge badge-success">● Active</span>
+          <span class="status-badge badge-warning">● Pending</span>
+          <span class="status-badge badge-error">● Failed</span>
+          <span class="status-badge badge-info">● Running</span>
+          <span class="tag tag-green">NEW</span>
+          <span class="tag tag-blue">BETA</span>
+          <span class="tag tag-pink">HOT</span>
+          <span class="nav-badge" style="font-size:11px;padding:3px 8px">99+</span>
+        </div>
+      </div>
+
+      <!-- PROGRESS -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(110,231,183,0.15)">📈</div>Progress Bars</div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span>Test Execution</span><span style="color:var(--accent)">72%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:72%"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span>Code Coverage</span><span style="color:var(--accent)">45%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:45%;background:linear-gradient(90deg,var(--accent3),var(--accent2))"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px"><span>Bug Resolution</span><span style="color:var(--accent)">91%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:91%;background:var(--success)"></div></div>
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-sm btn-secondary" onclick="animateProgress()" data-testid="animate-progress">Animate Progress</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAGINATION -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(244,114,182,0.15)">📄</div>Pagination</div>
+        <div class="pagination" id="pagination" data-testid="pagination">
+          <button class="page-btn" onclick="changePage(this,-1)" data-testid="prev-page">‹</button>
+          <button class="page-btn" onclick="setActivePage(this)" data-testid="page-1">1</button>
+          <button class="page-btn active" onclick="setActivePage(this)" data-testid="page-2">2</button>
+          <button class="page-btn" onclick="setActivePage(this)" data-testid="page-3">3</button>
+          <button class="page-btn" onclick="setActivePage(this)" data-testid="page-4">4</button>
+          <button class="page-btn" onclick="setActivePage(this)" data-testid="page-5">5</button>
+          <button class="page-btn" onclick="changePage(this,1)" data-testid="next-page">›</button>
+        </div>
+        <div id="page-info" style="font-size:13px;color:var(--text-muted);margin-top:12px">Showing page 2 of 5 — 20 items per page</div>
+      </div>
+
+      <!-- CALENDAR -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(110,231,183,0.15)">📅</div>Calendar</div>
+        <div class="calendar" id="cal-component" data-testid="calendar">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="calNav(-1)" data-testid="cal-prev">‹</button>
+            <div class="cal-month" id="cal-month-label"></div>
+            <button class="cal-nav" onclick="calNav(1)" data-testid="cal-next">›</button>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- IFRAME SECTION -->
+    <div class="section" style="margin-top:32px">
+      <div class="section-title">🖼 iFrame</div>
+      <div class="section-sub">Practice interacting with embedded content</div>
+      <div class="card">
+        <iframe src="https://www.wikipedia.org" width="100%" height="300" style="border:none;border-radius:8px;background:#fff" data-testid="embedded-iframe" title="Embedded Wikipedia"></iframe>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:12px">⚠️ Test switching context to iframe using Testsigma's iframe handling</div>
+      </div>
+    </div>
+
+    <!-- DRAG & DROP -->
+    <div class="section">
+      <div class="section-title">🔄 Drag & Drop</div>
+      <div class="section-sub">Drag items between columns</div>
+      <div class="grid-3" style="gap:16px">
+        <div class="card" id="col-todo" ondragover="event.preventDefault()" ondrop="dropCard(event,'col-todo')" data-testid="col-todo">
+          <div style="font-size:13px;font-weight:700;color:var(--warning);margin-bottom:12px">📋 To Do</div>
+          <div class="drag-card" draggable="true" ondragstart="dragStart(event)" id="dc1" data-testid="drag-tc1" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:grab;font-size:13px">TC-001: Login flow</div>
+          <div class="drag-card" draggable="true" ondragstart="dragStart(event)" id="dc2" data-testid="drag-tc2" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:grab;font-size:13px">TC-002: Registration</div>
+        </div>
+        <div class="card" id="col-inprogress" ondragover="event.preventDefault()" ondrop="dropCard(event,'col-inprogress')" data-testid="col-inprogress">
+          <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-bottom:12px">🔄 In Progress</div>
+          <div class="drag-card" draggable="true" ondragstart="dragStart(event)" id="dc3" data-testid="drag-tc3" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;cursor:grab;font-size:13px">TC-003: Checkout flow</div>
+        </div>
+        <div class="card" id="col-done" ondragover="event.preventDefault()" ondrop="dropCard(event,'col-done')" data-testid="col-done">
+          <div style="font-size:13px;font-weight:700;color:var(--success);margin-bottom:12px">✅ Done</div>
+          <div class="drag-card" draggable="true" ondragstart="dragStart(event)" id="dc4" data-testid="drag-tc4" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:grab;font-size:13px">TC-004: Home page</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE: TABLES -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-tables">
+  <div class="container" style="padding-top:40px">
+    <div class="section-title">📊 Data Tables</div>
+    <div class="section-sub">Sortable, searchable, filterable data tables</div>
+
+    <div class="card" style="margin-bottom:24px">
+      <!-- Controls -->
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+        <div class="search-wrap" style="flex:1;min-width:200px">
+          <span class="search-icon">🔍</span>
+          <input type="search" id="table-search" placeholder="Search test cases..." data-testid="table-search" oninput="filterTable()" style="padding-left:40px">
+        </div>
+        <select id="status-filter" data-testid="status-filter" onchange="filterTable()" style="width:auto;padding:11px 14px">
+          <option value="">All Status</option>
+          <option value="passed">Passed</option>
+          <option value="failed">Failed</option>
+          <option value="pending">Pending</option>
+          <option value="running">Running</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="exportCSV()" data-testid="export-csv">⬇ Export CSV</button>
+        <button class="btn btn-primary btn-sm" onclick="openModal('add-tc-modal')" data-testid="add-row-btn">+ Add Row</button>
+      </div>
+
+      <!-- Bulk actions -->
+      <div id="bulk-actions" style="display:none;padding:10px 14px;background:rgba(110,231,183,0.1);border-radius:8px;border:1px solid rgba(110,231,183,0.3);margin-bottom:12px;font-size:14px;display:flex;align-items:center;gap:12px">
+        <span id="selected-count" style="color:var(--accent);font-weight:600">0 selected</span>
+        <button class="btn btn-sm btn-secondary" onclick="bulkAction('run')">▶ Run</button>
+        <button class="btn btn-sm btn-secondary" onclick="bulkAction('archive')">📦 Archive</button>
+        <button class="btn btn-sm btn-danger" onclick="bulkAction('delete')">🗑 Delete</button>
+      </div>
+
+      <div class="table-wrap" data-testid="data-table">
+        <table id="main-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" data-testid="select-all"></th>
+              <th onclick="sortTable(1)" style="cursor:pointer" data-testid="col-id">ID ↕</th>
+              <th onclick="sortTable(2)" style="cursor:pointer" data-testid="col-name">Test Case ↕</th>
+              <th onclick="sortTable(3)" style="cursor:pointer" data-testid="col-suite">Suite ↕</th>
+              <th onclick="sortTable(4)" style="cursor:pointer" data-testid="col-status">Status ↕</th>
+              <th onclick="sortTable(5)" style="cursor:pointer" data-testid="col-duration">Duration ↕</th>
+              <th data-testid="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;flex-wrap:wrap;gap:12px">
+        <div style="font-size:13px;color:var(--text-muted)" id="table-info">Showing 10 of 12 rows</div>
+        <div class="pagination">
+          <button class="page-btn active" data-testid="tbl-page-1">1</button>
+          <button class="page-btn" data-testid="tbl-page-2">2</button>
+          <button class="page-btn" data-testid="tbl-next">›</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE: SHOP -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-shop">
+  <div class="container" style="padding-top:40px">
+    <div class="section-title">🛍 Practice E-Commerce</div>
+    <div class="section-sub">Add products to cart and proceed through the checkout flow</div>
+
+    <div class="layout-sidebar">
+      <div class="sidebar">
+        <div class="sidebar-section">Categories</div>
+        <button class="sidebar-item active" onclick="filterProducts('all',this)" data-testid="cat-all">🌐 All Products</button>
+        <button class="sidebar-item" onclick="filterProducts('electronics',this)" data-testid="cat-electronics">💻 Electronics</button>
+        <button class="sidebar-item" onclick="filterProducts('books',this)" data-testid="cat-books">📚 Books</button>
+        <button class="sidebar-item" onclick="filterProducts('accessories',this)" data-testid="cat-accessories">🎧 Accessories</button>
+        <button class="sidebar-item" onclick="filterProducts('clothing',this)" data-testid="cat-clothing">👕 Clothing</button>
+        <div class="sidebar-section">Sort By</div>
+        <button class="sidebar-item" onclick="sortProducts('price-low')" data-testid="sort-price-low">💰 Price: Low to High</button>
+        <button class="sidebar-item" onclick="sortProducts('price-high')" data-testid="sort-price-high">💎 Price: High to Low</button>
+        <button class="sidebar-item" onclick="sortProducts('name')" data-testid="sort-name">🔤 Name A-Z</button>
+        <div class="sidebar-section">Cart</div>
+        <div style="padding:12px;background:var(--surface2);border-radius:8px;text-align:center">
+          <div style="font-size:24px">🛒</div>
+          <div id="mini-cart-count" style="font-size:13px;color:var(--text-muted);margin-top:4px">0 items</div>
+          <div id="mini-cart-total" style="font-size:16px;font-family:'JetBrains Mono';color:var(--accent);font-weight:600;margin-top:4px">$0.00</div>
+          <button class="btn btn-primary btn-sm w-full" style="margin-top:10px" onclick="showPage('checkout')" data-testid="go-checkout">Checkout →</button>
+        </div>
+      </div>
+      <div>
+        <div class="product-grid" id="product-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE: CHECKOUT -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-checkout">
+  <div class="container" style="padding-top:40px;max-width:900px">
+    <div class="section-title">💳 Checkout</div>
+    <div class="section-sub">Complete your purchase</div>
+
+    <!-- Stepper -->
+    <div class="stepper" id="checkout-stepper">
+      <div class="step active" id="step-1"><div class="step-circle">1</div><div class="step-label">Shipping</div></div>
+      <div class="step" id="step-2"><div class="step-circle">2</div><div class="step-label">Payment</div></div>
+      <div class="step" id="step-3"><div class="step-circle">3</div><div class="step-label">Review</div></div>
+      <div class="step" id="step-4"><div class="step-circle">✓</div><div class="step-label">Confirm</div></div>
+    </div>
+
+    <!-- Step 1: Shipping -->
+    <div id="checkout-step-1" class="card" style="margin-bottom:24px">
+      <div class="card-title">📦 Shipping Address</div>
+      <div class="grid-2">
+        <div class="form-group"><label>First Name<span class="required">*</span></label><input type="text" id="sh-fname" placeholder="John" data-testid="sh-fname"></div>
+        <div class="form-group"><label>Last Name<span class="required">*</span></label><input type="text" id="sh-lname" placeholder="Doe" data-testid="sh-lname"></div>
+      </div>
+      <div class="form-group"><label>Email<span class="required">*</span></label><input type="email" id="sh-email" placeholder="john@example.com" data-testid="sh-email"></div>
+      <div class="form-group"><label>Address Line 1<span class="required">*</span></label><input type="text" id="sh-addr1" placeholder="123 Main Street" data-testid="sh-addr1"></div>
+      <div class="form-group"><label>Address Line 2</label><input type="text" id="sh-addr2" placeholder="Apt, Suite, Unit..." data-testid="sh-addr2"></div>
+      <div class="grid-2">
+        <div class="form-group"><label>City<span class="required">*</span></label><input type="text" id="sh-city" placeholder="New York" data-testid="sh-city"></div>
+        <div class="form-group"><label>ZIP Code<span class="required">*</span></label><input type="text" id="sh-zip" placeholder="10001" data-testid="sh-zip"></div>
+      </div>
+      <div class="form-group"><label>Country<span class="required">*</span></label>
+        <select id="sh-country" data-testid="sh-country">
+          <option value="">Select country</option>
+          <option value="in">India</option>
+          <option value="us">United States</option>
+          <option value="uk">United Kingdom</option>
+          <option value="ca">Canada</option>
+          <option value="au">Australia</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Shipping Method</label>
+        <div class="check-group">
+          <label class="check-item" style="background:var(--surface2);padding:12px;border-radius:8px;border:1px solid var(--border)">
+            <input type="radio" name="shipping" value="standard" checked data-testid="ship-standard">
+            <span style="flex:1">Standard (5-7 days)</span><span style="color:var(--accent);font-family:'JetBrains Mono'">Free</span>
+          </label>
+          <label class="check-item" style="background:var(--surface2);padding:12px;border-radius:8px;border:1px solid var(--border)">
+            <input type="radio" name="shipping" value="express" data-testid="ship-express">
+            <span style="flex:1">Express (2-3 days)</span><span style="color:var(--accent);font-family:'JetBrains Mono'">$9.99</span>
+          </label>
+          <label class="check-item" style="background:var(--surface2);padding:12px;border-radius:8px;border:1px solid var(--border)">
+            <input type="radio" name="shipping" value="overnight" data-testid="ship-overnight">
+            <span style="flex:1">Overnight (1 day)</span><span style="color:var(--accent);font-family:'JetBrains Mono'">$24.99</span>
+          </label>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="checkoutNext(1)" data-testid="next-to-payment">Continue to Payment →</button>
+    </div>
+
+    <!-- Step 2: Payment -->
+    <div id="checkout-step-2" class="card" style="margin-bottom:24px;display:none">
+      <div class="card-title">💳 Payment Details</div>
+      <!-- Card visual -->
+      <div style="background:linear-gradient(135deg,#1a1d26,#252830);border-radius:16px;padding:24px;margin-bottom:24px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(110,231,183,0.05)"></div>
+        <div style="font-family:'JetBrains Mono';font-size:20px;letter-spacing:3px;margin-bottom:24px" id="card-display-num">•••• •••• •••• ••••</div>
+        <div style="display:flex;justify-content:space-between">
+          <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">CARD HOLDER</div><div style="font-size:14px;font-family:'JetBrains Mono'" id="card-display-name">FULL NAME</div></div>
+          <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">EXPIRES</div><div style="font-size:14px;font-family:'JetBrains Mono'" id="card-display-exp">MM/YY</div></div>
+          <div style="font-size:28px">💳</div>
+        </div>
+      </div>
+      <div class="form-group"><label>Card Number<span class="required">*</span></label><input type="text" id="card-num" placeholder="1234 5678 9012 3456" maxlength="19" data-testid="card-number" oninput="formatCardNum(this)"></div>
+      <div class="form-group"><label>Cardholder Name<span class="required">*</span></label><input type="text" id="card-name" placeholder="JOHN DOE" data-testid="card-name" oninput="document.getElementById('card-display-name').textContent=this.value||'FULL NAME'"></div>
+      <div class="grid-2">
+        <div class="form-group"><label>Expiry Date<span class="required">*</span></label><input type="text" id="card-exp" placeholder="MM/YY" maxlength="5" data-testid="card-expiry" oninput="formatExpiry(this)"></div>
+        <div class="form-group"><label>CVV<span class="required">*</span></label><input type="password" id="card-cvv" placeholder="•••" maxlength="3" data-testid="card-cvv"></div>
+      </div>
+      <div class="form-group">
+        <label>Or pay with</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-secondary" onclick="showToast('PayPal flow initiated','info')" data-testid="pay-paypal">🅿 PayPal</button>
+          <button class="btn btn-secondary" onclick="showToast('UPI QR code generated','info')" data-testid="pay-upi">📱 UPI</button>
+          <button class="btn btn-secondary" onclick="showToast('Bank transfer details shown','info')" data-testid="pay-bank">🏦 Bank Transfer</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-secondary" onclick="checkoutPrev(2)" data-testid="back-to-shipping">← Back</button>
+        <button class="btn btn-primary" onclick="checkoutNext(2)" data-testid="next-to-review">Review Order →</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Review -->
+    <div id="checkout-step-3" class="card" style="margin-bottom:24px;display:none">
+      <div class="card-title">📋 Order Review</div>
+      <div id="order-review-items" style="margin-bottom:20px"></div>
+      <div class="form-group">
+        <label>Coupon Code</label>
+        <div style="display:flex;gap:10px">
+          <input type="text" id="coupon-input" placeholder="Enter code (try SAVE10)" data-testid="coupon-input" style="flex:1">
+          <button class="btn btn-outline" onclick="applyCoupon()" data-testid="apply-coupon">Apply</button>
+        </div>
+        <div id="coupon-msg" style="font-size:13px;margin-top:8px"></div>
+      </div>
+      <div style="border-top:1px solid var(--border);padding-top:16px">
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px"><span>Subtotal</span><span id="rev-subtotal" class="font-mono">$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px"><span>Shipping</span><span id="rev-shipping" class="font-mono">Free</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px;color:var(--success)"><span>Discount</span><span id="rev-discount" class="font-mono">-$0.00</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:18px;font-weight:700;font-family:'Syne';border-top:1px solid var(--border);padding-top:12px;margin-top:4px"><span>Total</span><span style="color:var(--accent)" id="rev-total" class="font-mono">$0.00</span></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-secondary" onclick="checkoutPrev(3)" data-testid="back-to-payment">← Back</button>
+        <button class="btn btn-primary" onclick="checkoutNext(3)" data-testid="place-order">Place Order 🎉</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Confirmation -->
+    <div id="checkout-step-4" style="display:none;text-align:center;padding:60px 24px">
+      <div style="font-size:72px;margin-bottom:20px;animation:bounce 0.5s ease">🎉</div>
+      <div style="font-family:'Syne';font-size:32px;font-weight:800;margin-bottom:12px">Order Placed!</div>
+      <div style="color:var(--text-muted);margin-bottom:8px">Your order <strong style="color:var(--accent)" id="order-id">#TC-2024-001</strong> has been confirmed.</div>
+      <div style="color:var(--text-muted);margin-bottom:32px">A confirmation email has been sent to your address.</div>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="showPage('shop')" data-testid="continue-shopping">Continue Shopping</button>
+        <button class="btn btn-secondary" onclick="showPage('home')" data-testid="back-home">Back to Home</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PAGE: DASHBOARD -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="page" id="page-dashboard">
+  <div class="container" style="padding-top:40px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;flex-wrap:wrap;gap:12px">
+      <div>
+        <div class="section-title">📈 Analytics Dashboard</div>
+        <div class="section-sub" style="margin-bottom:0">Real-time test metrics and insights</div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <select data-testid="dash-range" style="width:auto;padding:8px 14px">
+          <option>Last 7 days</option>
+          <option>Last 30 days</option>
+          <option>Last quarter</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="refreshDashboard()" data-testid="refresh-dash">↻ Refresh</button>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="grid-3" style="gap:16px;margin-bottom:24px">
+      <div class="stat-card"><div class="stat-value" style="color:var(--success)" id="dash-total">247</div><div class="stat-label">Total Test Cases</div><div class="stat-delta delta-up">↑ 12 this week</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--accent)" id="dash-pass">198</div><div class="stat-label">Tests Passed</div><div class="stat-delta delta-up">↑ 80.2% pass rate</div></div>
+      <div class="stat-card"><div class="stat-value" style="color:var(--error)" id="dash-fail">49</div><div class="stat-label">Tests Failed</div><div class="stat-delta delta-down">↓ 4 new failures</div></div>
+    </div>
+
+    <div class="grid-2" style="gap:24px">
+      <!-- Chart -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(110,231,183,0.15)">📊</div>Test Results (7 days)</div>
+        <canvas id="bar-chart" width="400" height="200" data-testid="bar-chart"></canvas>
+      </div>
+
+      <!-- Donut chart -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(129,140,248,0.15)">🥧</div>Status Distribution</div>
+        <canvas id="donut-chart" width="300" height="200" data-testid="donut-chart" style="display:block;margin:0 auto"></canvas>
+        <div style="display:flex;gap:16px;justify-content:center;margin-top:16px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px"><div style="width:12px;height:12px;border-radius:3px;background:var(--success)"></div>Passed (80%)</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px"><div style="width:12px;height:12px;border-radius:3px;background:var(--error)"></div>Failed (12%)</div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:13px"><div style="width:12px;height:12px;border-radius:3px;background:var(--warning)"></div>Pending (8%)</div>
+        </div>
+      </div>
+
+      <!-- Activity Feed -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(244,114,182,0.15)">📜</div>Activity Feed</div>
+        <div style="display:flex;flex-direction:column;gap:0" id="activity-feed">
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><div class="avatar" style="background:rgba(52,211,153,0.15);color:var(--success)">✓</div><div><div style="font-size:14px;font-weight:500">Login Test Suite - PASSED</div><div style="font-size:12px;color:var(--text-muted)">2 min ago · 12 test cases</div></div></div>
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><div class="avatar" style="background:rgba(248,113,113,0.15);color:var(--error)">✗</div><div><div style="font-size:14px;font-weight:500">Payment Flow - FAILED</div><div style="font-size:12px;color:var(--text-muted)">18 min ago · TC-045 assertion error</div></div></div>
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><div class="avatar" style="background:rgba(129,140,248,0.15);color:var(--accent2)">▶</div><div><div style="font-size:14px;font-weight:500">Regression Suite - RUNNING</div><div style="font-size:12px;color:var(--text-muted)">Just now · 48/120 complete</div></div></div>
+          <div style="display:flex;gap:12px;padding:12px 0"><div class="avatar" style="background:rgba(251,191,36,0.15);color:var(--warning)">!</div><div><div style="font-size:14px;font-weight:500">Flaky Test Detected - TC-088</div><div style="font-size:12px;color:var(--text-muted)">1 hour ago · 3 retries needed</div></div></div>
+        </div>
+      </div>
+
+      <!-- Team -->
+      <div class="card">
+        <div class="card-title"><div class="icon" style="background:rgba(110,231,183,0.15)">👥</div>Team Leaderboard</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="color:var(--warning);font-size:18px;width:24px;text-align:center">🥇</span>
+            <div class="avatar" style="background:rgba(110,231,183,0.2);color:var(--accent)">AS</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:500">Anya Sharma</div><div style="font-size:12px;color:var(--text-muted)">47 tests automated</div></div>
+            <div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:94%"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="color:var(--text-muted);font-size:18px;width:24px;text-align:center">🥈</span>
+            <div class="avatar" style="background:rgba(129,140,248,0.2);color:var(--accent2)">RK</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:500">Rahul Kumar</div><div style="font-size:12px;color:var(--text-muted)">39 tests automated</div></div>
+            <div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:78%;background:var(--accent2)"></div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span style="color:var(--text-muted);font-size:18px;width:24px;text-align:center">🥉</span>
+            <div class="avatar" style="background:rgba(244,114,182,0.2);color:var(--accent3)">PM</div>
+            <div style="flex:1"><div style="font-size:14px;font-weight:500">Priya M</div><div style="font-size:12px;color:var(--text-muted)">31 tests automated</div></div>
+            <div class="progress-bar" style="width:100px"><div class="progress-fill" style="width:62%;background:var(--accent3)"></div></div>
+          </div>
+        </div>
+        <button class="btn btn-secondary btn-sm w-full" style="margin-top:16px" onclick="showToast('Team report exported!','success')" data-testid="export-team">Export Report</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- MODALS -->
+<!-- ══════════════════════════════════════════════════════ -->
+
+<!-- Info Modal -->
+<div class="modal-overlay" id="info-modal" onclick="closeModalOutside(event,'info-modal')">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">ℹ️ Information</div><button class="modal-close" onclick="closeModal('info-modal')" data-testid="close-info-modal">✕</button></div>
+    <p style="font-size:14px;color:var(--text-muted);line-height:1.7">This is an informational modal dialog. Use it to practice automation of popup windows, modal interactions, and dialog handling in Testsigma.</p>
+    <div class="modal-footer"><button class="btn btn-primary" onclick="closeModal('info-modal')" data-testid="ok-info-modal">Got it!</button></div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirm-modal" onclick="closeModalOutside(event,'confirm-modal')">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">⚠️ Confirm Action</div><button class="modal-close" onclick="closeModal('confirm-modal')">✕</button></div>
+    <p style="font-size:14px;color:var(--text-muted);line-height:1.7">Are you sure you want to perform this action? This cannot be undone.</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('confirm-modal')" data-testid="cancel-confirm">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('confirm-modal');showToast('Action confirmed!','success')" data-testid="confirm-action">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Form Modal -->
+<div class="modal-overlay" id="form-modal" onclick="closeModalOutside(event,'form-modal')">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">📝 Quick Add</div><button class="modal-close" onclick="closeModal('form-modal')">✕</button></div>
+    <div class="form-group"><label>Name</label><input type="text" placeholder="Enter name" data-testid="modal-name"></div>
+    <div class="form-group"><label>Category</label><select data-testid="modal-category"><option>UI Testing</option><option>API Testing</option><option>Performance</option></select></div>
+    <div class="form-group"><label>Notes</label><textarea placeholder="Add notes..." data-testid="modal-notes" rows="3"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('form-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('form-modal');showToast('Item added successfully!','success')" data-testid="modal-submit">Add Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal-overlay" id="delete-modal" onclick="closeModalOutside(event,'delete-modal')">
+  <div class="modal">
+    <div style="text-align:center;padding:12px 0">
+      <div style="font-size:56px;margin-bottom:16px">🗑️</div>
+      <div class="modal-title" style="font-size:20px;margin-bottom:12px">Delete Account?</div>
+      <p style="font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:20px">This will permanently delete your account and all associated data. This action <strong style="color:var(--error)">cannot be undone</strong>.</p>
+      <div class="form-group"><input type="text" placeholder='Type "DELETE" to confirm' id="delete-confirm" data-testid="delete-confirm-input"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('delete-modal')" data-testid="cancel-delete">Keep Account</button>
+      <button class="btn btn-danger" onclick="confirmDelete()" data-testid="confirm-delete">Delete Forever</button>
+    </div>
+  </div>
+</div>
+
+<!-- Deactivate Modal -->
+<div class="modal-overlay" id="deactivate-modal" onclick="closeModalOutside(event,'deactivate-modal')">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">😴 Deactivate Account</div><button class="modal-close" onclick="closeModal('deactivate-modal')">✕</button></div>
+    <p style="font-size:14px;color:var(--text-muted);line-height:1.7">Your account will be temporarily disabled. You can reactivate it at any time.</p>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('deactivate-modal')" data-testid="cancel-deactivate">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('deactivate-modal');showToast('Account deactivated','warning')" data-testid="confirm-deactivate">Deactivate</button>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal-overlay" id="forgot-modal" onclick="closeModalOutside(event,'forgot-modal')">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">🔑 Forgot Password</div><button class="modal-close" onclick="closeModal('forgot-modal')">✕</button></div>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">Enter your email address and we'll send you a reset link.</p>
+    <div class="form-group"><label>Email</label><input type="email" placeholder="your@email.com" data-testid="forgot-email"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('forgot-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('forgot-modal');showToast('Reset email sent! Check your inbox','success')" data-testid="send-reset">Send Reset Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add TC Modal -->
+<div class="modal-overlay" id="add-tc-modal" onclick="closeModalOutside(event,'add-tc-modal')">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">➕ Add Test Case</div><button class="modal-close" onclick="closeModal('add-tc-modal')">✕</button></div>
+    <div class="form-group"><label>Test Case Name</label><input type="text" id="new-tc-name" placeholder="e.g. Verify login button" data-testid="new-tc-name"></div>
+    <div class="form-group"><label>Suite</label><select id="new-tc-suite" data-testid="new-tc-suite"><option>Login Suite</option><option>Registration Suite</option><option>Checkout Suite</option><option>Dashboard Suite</option></select></div>
+    <div class="form-group"><label>Priority</label><select id="new-tc-priority" data-testid="new-tc-priority"><option>High</option><option>Medium</option><option>Low</option></select></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('add-tc-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addTableRow();closeModal('add-tc-modal')" data-testid="save-tc">Save Test Case</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- JAVASCRIPT -->
+<!-- ══════════════════════════════════════════════════════ -->
+<script>
+// ── PAGE NAVIGATION ──
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('nav a[data-page]').forEach(a => a.classList.remove('active'));
+  const link = document.querySelector(`nav a[data-page="${name}"]`);
+  if(link) link.classList.add('active');
+  window.scrollTo(0,0);
+  if(name==='dashboard') initCharts();
+  if(name==='tables') initTable();
+  if(name==='shop') renderProducts();
+  if(name==='checkout') initReview();
+}
+
+// ── TABS ──
+function switchTab(tabGroupId, paneId, btn) {
+  const group = document.getElementById(tabGroupId);
+  if(!group) return;
+  group.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  const container = group.closest('.card') || group.parentElement;
+  container.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const pane = document.getElementById(paneId);
+  if(pane) pane.classList.add('active');
+}
+
+// ── TOAST ──
+function showToast(msg, type='info') {
+  const icons = {success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};
+  const colors = {success:'var(--success)',error:'var(--error)',warning:'var(--warning)',info:'var(--accent2)'};
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<span style="font-size:18px">${icons[type]}</span><span style="flex:1;color:${colors[type]}">${msg}</span>`;
+  const c = document.getElementById('toast-container');
+  c.appendChild(t);
+  setTimeout(() => { t.classList.add('toast-exit'); setTimeout(() => t.remove(), 300); }, 3000);
+}
+
+// ── MODALS ──
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function closeModalOutside(e, id) { if(e.target.id===id) closeModal(id); }
+function showForgotModal() { openModal('forgot-modal'); }
+function markAllRead() { closeNotif(); showToast('All notifications marked as read','success'); }
+
+// ── NOTIFICATIONS ──
+function toggleNotif() {
+  const p = document.getElementById('notif-panel');
+  p.classList.toggle('open');
+}
+function closeNotif() { document.getElementById('notif-panel').classList.remove('open'); }
+document.addEventListener('click', e => {
+  if(!document.getElementById('notif-btn').contains(e.target)) closeNotif();
+});
+
+// ── ACCORDION ──
+function toggleAccordion(header) {
+  header.classList.toggle('open');
+  const body = header.nextElementSibling;
+  body.classList.toggle('open');
+}
+
+// ── FORMS ──
+function togglePass(id, btn) {
+  const inp = document.getElementById(id);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.textContent = inp.type === 'password' ? '👁' : '🙈';
+}
+
+function submitRegistration() {
+  const fname = document.getElementById('reg-fname').value.trim();
+  const lname = document.getElementById('reg-lname').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  const cpass = document.getElementById('reg-cpass').value;
+  const terms = document.getElementById('reg-terms').checked;
+  const errEl = document.getElementById('reg-error');
+  const errMsg = document.getElementById('reg-error-msg');
+  const successEl = document.getElementById('reg-success');
+  errEl.style.display = 'none'; successEl.style.display = 'none';
+  if(!fname) { errMsg.textContent='First name is required'; errEl.style.display='flex'; return; }
+  if(!lname) { errMsg.textContent='Last name is required'; errEl.style.display='flex'; return; }
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errMsg.textContent='Valid email is required'; errEl.style.display='flex'; return; }
+  if(pass.length < 8) { errMsg.textContent='Password must be at least 8 characters'; errEl.style.display='flex'; return; }
+  if(pass !== cpass) { errMsg.textContent='Passwords do not match'; errEl.style.display='flex'; return; }
+  if(!terms) { errMsg.textContent='You must accept the Terms of Service'; errEl.style.display='flex'; return; }
+  successEl.style.display='flex';
+  showToast('Account created! Welcome aboard 🎉','success');
+  setTimeout(() => { showPage('forms'); switchTab('form-tabs','form-login',document.querySelector('#form-tabs .tab-btn:nth-child(2)')); }, 2000);
+}
+
+function submitLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  if(email === 'test@example.com' && pass === 'Test@1234') {
+    showToast('Login successful! Welcome back 👋','success');
+    setTimeout(() => showPage('dashboard'), 1000);
+  } else {
+    errEl.style.display = 'flex';
+  }
+}
+
+function saveProfile() {
+  showToast('Profile saved successfully!','success');
+}
+
+// Password strength
+document.addEventListener('DOMContentLoaded', () => {
+  const np = document.getElementById('new-pass');
+  if(np) np.addEventListener('input', function() {
+    const v = this.value;
+    let strength = 0;
+    if(v.length >= 8) strength++;
+    if(/[A-Z]/.test(v)) strength++;
+    if(/[0-9]/.test(v)) strength++;
+    if(/[^A-Za-z0-9]/.test(v)) strength++;
+    const bar = document.getElementById('pass-strength');
+    const label = document.getElementById('pass-strength-label');
+    const pcts = [0,25,50,75,100];
+    const labels = ['','Weak','Fair','Good','Strong'];
+    const colors = ['','var(--error)','var(--warning)','var(--accent2)','var(--success)'];
+    if(bar) { bar.style.width = pcts[strength]+'%'; bar.style.background = colors[strength]; }
+    if(label) { label.textContent = labels[strength]; label.style.color = colors[strength]; }
+  });
+  initCalendar();
+  initTable();
+});
+
+function confirmDelete() {
+  const v = document.getElementById('delete-confirm').value;
+  if(v === 'DELETE') { closeModal('delete-modal'); showToast('Account deleted permanently','error'); }
+  else { showToast('Type DELETE to confirm','warning'); }
+}
+
+// ── SEARCH ──
+function handleSearch(q) {
+  const res = document.getElementById('search-results');
+  res.classList.toggle('open', q.length > 1);
+}
+function selectSearch(val) {
+  document.getElementById('adv-search').value = val;
+  document.getElementById('search-results').classList.remove('open');
+  showToast(`Searching for: ${val}`,'info');
+}
+
+// ── CHIPS ──
+function toggleChip(el) { el.classList.toggle('selected'); }
+
+// ── STAR RATING ──
+let currentRating = 4;
+function setRating(n) {
+  currentRating = n;
+  const stars = document.querySelectorAll('#star-rating .star');
+  stars.forEach((s,i) => s.classList.toggle('active', i < n));
+  const labels = ['','Terrible','Bad','Okay','Good','Excellent'];
+  document.getElementById('rating-text').textContent = `${n} out of 5 stars — ${labels[n]}`;
+}
+
+// ── FILE UPLOAD ──
+function handleFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('file-drop').classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+}
+function handleFileSelect(inp) { handleFiles(inp.files); }
+function handleFiles(files) {
+  const list = document.getElementById('file-list');
+  Array.from(files).forEach(f => {
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;align-items:center;gap:10px;background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:13px';
+    item.innerHTML = `<span>📄</span><span style="flex:1">${f.name}</span><span style="color:var(--text-muted)">${(f.size/1024).toFixed(1)}KB</span><span style="cursor:pointer;color:var(--error)" onclick="this.parentElement.remove()">✕</span>`;
+    list.appendChild(item);
+  });
+  showToast(`${files.length} file(s) uploaded`,'success');
+}
+
+// ── PAGINATION ──
+function setActivePage(btn) {
+  btn.closest('.pagination').querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const pg = btn.textContent;
+  document.getElementById('page-info').textContent = `Showing page ${pg} of 5 — 20 items per page`;
+}
+function changePage(btn, dir) {
+  const pag = btn.closest('.pagination');
+  const btns = [...pag.querySelectorAll('.page-btn:not(:first-child):not(:last-child)')];
+  const active = btns.findIndex(b => b.classList.contains('active'));
+  const next = active + dir;
+  if(next >= 0 && next < btns.length) { btns[active].classList.remove('active'); btns[next].classList.add('active'); }
+}
+
+// ── ACCORDION PROGRESS ANIMATE ──
+function animateProgress() {
+  document.querySelectorAll('.progress-fill').forEach(p => {
+    p.style.width = '0%';
+    setTimeout(() => { p.style.width = p.getAttribute('data-width') || p.style.width; }, 50);
+  });
+}
+
+// ── DRAG & DROP ──
+let dragId = null;
+function dragStart(e) { dragId = e.target.id; e.target.style.opacity='0.5'; }
+function dropCard(e, colId) {
+  if(!dragId) return;
+  const el = document.getElementById(dragId);
+  el.style.opacity='1';
+  document.getElementById(colId).appendChild(el);
+  dragId = null;
+  showToast('Card moved!','info');
+}
+
+// ── CALENDAR ──
+let calDate = new Date();
+function initCalendar() {
+  renderCal();
+}
+function calNav(dir) {
+  calDate.setMonth(calDate.getMonth()+dir);
+  renderCal();
+}
+function renderCal() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const days = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  document.getElementById('cal-month-label').textContent = months[calDate.getMonth()] + ' ' + calDate.getFullYear();
+  const grid = document.getElementById('cal-grid');
+  grid.innerHTML = days.map(d => `<div class="cal-day-header">${d}</div>`).join('');
+  const first = new Date(calDate.getFullYear(), calDate.getMonth(), 1);
+  const last = new Date(calDate.getFullYear(), calDate.getMonth()+1, 0);
+  const today = new Date();
+  let start = first.getDay();
+  const prev = new Date(calDate.getFullYear(), calDate.getMonth(), 0);
+  for(let i=start-1;i>=0;i--) {
+    grid.innerHTML += `<div class="cal-day other-month">${prev.getDate()-i}</div>`;
+  }
+  for(let d=1;d<=last.getDate();d++) {
+    const isToday = d===today.getDate() && calDate.getMonth()===today.getMonth() && calDate.getFullYear()===today.getFullYear();
+    grid.innerHTML += `<div class="cal-day${isToday?' today':''}" onclick="selectCalDay(this,${d})" data-testid="cal-day-${d}">${d}</div>`;
+  }
+}
+function selectCalDay(el, d) {
+  document.querySelectorAll('#cal-grid .cal-day').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+  showToast(`Selected: ${d} ${document.getElementById('cal-month-label').textContent}`,'info');
+}
+
+// ── TABLE ──
+const tableData = [
+  {id:'TC-001',name:'Login with valid credentials',suite:'Login Suite',status:'passed',duration:'1.2s'},
+  {id:'TC-002',name:'Login with invalid password',suite:'Login Suite',status:'failed',duration:'0.8s'},
+  {id:'TC-003',name:'Register new user',suite:'Registration Suite',status:'passed',duration:'2.1s'},
+  {id:'TC-004',name:'Forgot password flow',suite:'Login Suite',status:'passed',duration:'3.4s'},
+  {id:'TC-005',name:'Add item to cart',suite:'Checkout Suite',status:'passed',duration:'1.8s'},
+  {id:'TC-006',name:'Remove item from cart',suite:'Checkout Suite',status:'pending',duration:'—'},
+  {id:'TC-007',name:'Apply coupon code',suite:'Checkout Suite',status:'passed',duration:'0.9s'},
+  {id:'TC-008',name:'Complete payment',suite:'Checkout Suite',status:'failed',duration:'4.2s'},
+  {id:'TC-009',name:'View dashboard',suite:'Dashboard Suite',status:'passed',duration:'1.1s'},
+  {id:'TC-010',name:'Export report CSV',suite:'Dashboard Suite',status:'running',duration:'...'},
+  {id:'TC-011',name:'Sort table columns',suite:'Dashboard Suite',status:'passed',duration:'0.5s'},
+  {id:'TC-012',name:'Filter by status',suite:'Dashboard Suite',status:'pending',duration:'—'},
+];
+
+let tableDataCurrent = [...tableData];
+function initTable() { renderTable(); }
+function renderTable() {
+  const search = (document.getElementById('table-search')||{}).value||'';
+  const statusF = (document.getElementById('status-filter')||{}).value||'';
+  const filtered = tableDataCurrent.filter(r =>
+    (!search || r.id.toLowerCase().includes(search.toLowerCase()) || r.name.toLowerCase().includes(search.toLowerCase()) || r.suite.toLowerCase().includes(search.toLowerCase())) &&
+    (!statusF || r.status === statusF)
+  );
+  const statusBadge = {passed:'badge-success',failed:'badge-error',pending:'badge-warning',running:'badge-info'};
+  const statusIcon = {passed:'✓',failed:'✗',pending:'⏳',running:'▶'};
+  const tbody = document.getElementById('table-body');
+  if(!tbody) return;
+  tbody.innerHTML = filtered.map(r => `
+    <tr data-id="${r.id}">
+      <td><input type="checkbox" class="row-check" onchange="updateBulk()" data-testid="check-${r.id}"></td>
+      <td style="font-family:'JetBrains Mono';font-size:12px;color:var(--accent2)">${r.id}</td>
+      <td>${r.name}</td>
+      <td><span style="color:var(--text-muted)">${r.suite}</span></td>
+      <td><span class="status-badge ${statusBadge[r.status]}">${statusIcon[r.status]} ${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span></td>
+      <td style="font-family:'JetBrains Mono';font-size:13px">${r.duration}</td>
+      <td><div style="display:flex;gap:6px">
+        <button class="btn btn-sm btn-secondary" onclick="showToast('Running ${r.id}...','info')" data-testid="run-${r.id}">▶</button>
+        <button class="btn btn-sm btn-outline" onclick="editRow('${r.id}')" data-testid="edit-${r.id}">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteRow('${r.id}')" data-testid="delete-${r.id}">🗑</button>
+      </div></td>
+    </tr>
+  `).join('');
+  const info = document.getElementById('table-info');
+  if(info) info.textContent = `Showing ${filtered.length} of ${tableDataCurrent.length} rows`;
+}
+function filterTable() { renderTable(); }
+function sortTable(col) {
+  const keys = ['','id','name','suite','status','duration'];
+  const k = keys[col];
+  tableDataCurrent.sort((a,b) => a[k].localeCompare(b[k]));
+  renderTable();
+}
+function toggleSelectAll(cb) {
+  document.querySelectorAll('.row-check').forEach(c => { c.checked = cb.checked; });
+  updateBulk();
+}
+function updateBulk() {
+  const n = [...document.querySelectorAll('.row-check:checked')].length;
+  document.getElementById('bulk-actions').style.display = n ? 'flex' : 'none';
+  const sc = document.getElementById('selected-count');
+  if(sc) sc.textContent = `${n} selected`;
+}
+function bulkAction(action) {
+  const icons = {run:'▶ Running selected...', archive:'📦 Archived selected', delete:'🗑 Deleted selected'};
+  showToast(icons[action],'info');
+  document.querySelectorAll('.row-check').forEach(c => c.checked=false);
+  document.getElementById('select-all').checked=false;
+  updateBulk();
+}
+function deleteRow(id) {
+  tableDataCurrent = tableDataCurrent.filter(r => r.id !== id);
+  renderTable();
+  showToast(`${id} deleted`,'error');
+}
+function editRow(id) { showToast(`Editing ${id}`,'info'); }
+function addTableRow() {
+  const name = document.getElementById('new-tc-name').value || 'New Test Case';
+  const suite = document.getElementById('new-tc-suite').value;
+  const id = 'TC-' + String(tableDataCurrent.length+1).padStart(3,'0');
+  tableDataCurrent.push({id,name,suite,status:'pending',duration:'—'});
+  renderTable();
+  showToast(`${id} added!`,'success');
+}
+function exportCSV() {
+  const header = 'ID,Name,Suite,Status,Duration\n';
+  const rows = tableDataCurrent.map(r => `${r.id},"${r.name}",${r.suite},${r.status},${r.duration}`).join('\n');
+  const blob = new Blob([header+rows], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'test-cases.csv';
+  a.click();
+  showToast('CSV exported!','success');
+}
+
+// ── SHOP ──
+const products = [
+  {id:1,name:'Selenium Course',emoji:'🎓',price:49,old:99,cat:'books'},
+  {id:2,name:'API Tester Pro',emoji:'⚡',price:29,old:59,cat:'electronics'},
+  {id:3,name:'QA Handbook',emoji:'📘',price:19,old:39,cat:'books'},
+  {id:4,name:'Test Headset',emoji:'🎧',price:79,old:120,cat:'accessories'},
+  {id:5,name:'Dev Laptop',emoji:'💻',price:999,old:1299,cat:'electronics'},
+  {id:6,name:'QA T-Shirt',emoji:'👕',price:25,old:40,cat:'clothing'},
+  {id:7,name:'Clicky Keyboard',emoji:'⌨️',price:149,old:199,cat:'accessories'},
+  {id:8,name:'Cypress Guide',emoji:'📗',price:15,old:30,cat:'books'},
+];
+let cart = [];
+let currentCat = 'all';
+function renderProducts() {
+  const filtered = currentCat==='all' ? products : products.filter(p => p.cat===currentCat);
+  const grid = document.getElementById('product-grid');
+  if(!grid) return;
+  grid.innerHTML = filtered.map(p => `
+    <div class="product-card" data-testid="product-${p.id}">
+      <div class="product-img">${p.emoji}</div>
+      <div class="product-info">
+        <div class="product-name">${p.name}</div>
+        <div style="margin-top:4px"><span class="product-price">$${p.price}</span><span class="product-old">$${p.old}</span></div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text-muted)">Save $${p.old-p.price}</div>
+        <button class="btn btn-primary btn-sm w-full" style="margin-top:12px" onclick="addToCart(${p.id})" data-testid="add-cart-${p.id}">Add to Cart</button>
+      </div>
+    </div>
+  `).join('');
+}
+function filterProducts(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.sidebar-item').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts();
+}
+function sortProducts(by) {
+  if(by==='price-low') products.sort((a,b) => a.price-b.price);
+  if(by==='price-high') products.sort((a,b) => b.price-a.price);
+  if(by==='name') products.sort((a,b) => a.name.localeCompare(b.name));
+  renderProducts();
+}
+function addToCart(id) {
+  const p = products.find(x => x.id===id);
+  const existing = cart.find(x => x.id===id);
+  if(existing) existing.qty++;
+  else cart.push({...p,qty:1});
+  updateCartUI();
+  showToast(`${p.name} added to cart!`,'success');
+}
+function updateCartUI() {
+  const total = cart.reduce((s,x) => s+x.price*x.qty, 0);
+  const count = cart.reduce((s,x) => s+x.qty, 0);
+  document.getElementById('cart-badge').textContent = count;
+  const mcc = document.getElementById('mini-cart-count');
+  const mct = document.getElementById('mini-cart-total');
+  if(mcc) mcc.textContent = `${count} item${count!==1?'s':''}`;
+  if(mct) mct.textContent = '$'+total.toFixed(2);
+}
+
+// ── CHECKOUT ──
+let checkoutStep = 1;
+let couponDiscount = 0;
+function checkoutNext(step) {
+  if(step===1) {
+    const fname = document.getElementById('sh-fname').value;
+    const addr = document.getElementById('sh-addr1').value;
+    if(!fname||!addr) { showToast('Please fill required fields','warning'); return; }
+  }
+  if(step===2) {
+    const num = document.getElementById('card-num').value;
+    if(num.replace(/\s/g,'').length < 12) { showToast('Enter valid card number','warning'); return; }
+  }
+  if(step===3) {
+    const id = '#TC-' + Math.floor(Math.random()*90000+10000);
+    document.getElementById('order-id').textContent = id;
+    showToast('Order placed successfully! 🎉','success');
+  }
+  document.getElementById('checkout-step-'+step).style.display='none';
+  document.getElementById('step-'+step).classList.add('done');
+  const next = step+1;
+  checkoutStep = next;
+  const nextEl = document.getElementById('checkout-step-'+next);
+  if(nextEl) nextEl.style.display='block';
+  const stepEl = document.getElementById('step-'+next);
+  if(stepEl) stepEl.classList.add('active');
+  if(step===2) initReview();
+}
+function checkoutPrev(step) {
+  document.getElementById('checkout-step-'+step).style.display='none';
+  const prev = step-1;
+  document.getElementById('checkout-step-'+prev).style.display='block';
+  document.getElementById('step-'+step).classList.remove('active');
+}
+function initReview() {
+  const items = document.getElementById('order-review-items');
+  if(!items) return;
+  if(cart.length===0) cart = [{name:'Sample Product',emoji:'🎁',price:49,qty:1}];
+  const subtotal = cart.reduce((s,x) => s+x.price*x.qty, 0);
+  items.innerHTML = cart.map(x => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:24px">${x.emoji||'📦'}</span>
+      <div style="flex:1"><div style="font-size:14px;font-weight:500">${x.name}</div><div style="font-size:12px;color:var(--text-muted)">Qty: ${x.qty}</div></div>
+      <div style="font-family:'JetBrains Mono';color:var(--accent)">$${(x.price*x.qty).toFixed(2)}</div>
+    </div>
+  `).join('');
+  document.getElementById('rev-subtotal').textContent = '$'+subtotal.toFixed(2);
+  document.getElementById('rev-total').textContent = '$'+(subtotal - couponDiscount).toFixed(2);
+  document.getElementById('rev-discount').textContent = '-$'+couponDiscount.toFixed(2);
+}
+function applyCoupon() {
+  const code = document.getElementById('coupon-input').value.trim().toUpperCase();
+  const msg = document.getElementById('coupon-msg');
+  const coupons = {SAVE10:10, HALF50:0.5, QA20:20};
+  if(code==='SAVE10') { couponDiscount=10; msg.textContent='✅ $10 discount applied!'; msg.style.color='var(--success)'; }
+  else if(code==='QA20') { couponDiscount=20; msg.textContent='✅ $20 discount applied!'; msg.style.color='var(--success)'; }
+  else if(code==='HALF50') { const sub=cart.reduce((s,x)=>s+x.price*x.qty,0); couponDiscount=sub*0.5; msg.textContent='✅ 50% discount applied!'; msg.style.color='var(--success)'; }
+  else { couponDiscount=0; msg.textContent='❌ Invalid coupon code'; msg.style.color='var(--error)'; }
+  initReview();
+}
+function formatCardNum(inp) {
+  let v = inp.value.replace(/\D/g,'').substring(0,16);
+  inp.value = v.match(/.{1,4}/g)?.join(' ') || v;
+  const disp = v.padEnd(16,'•').match(/.{1,4}/g).join(' ');
+  document.getElementById('card-display-num').textContent = disp;
+}
+function formatExpiry(inp) {
+  let v = inp.value.replace(/\D/g,'');
+  if(v.length>=2) v = v.substring(0,2)+'/'+v.substring(2,4);
+  inp.value = v;
+  document.getElementById('card-display-exp').textContent = v||'MM/YY';
+}
+
+// ── DASHBOARD CHARTS ──
+function initCharts() {
+  drawBarChart();
+  drawDonutChart();
+}
+function drawBarChart() {
+  const canvas = document.getElementById('bar-chart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const passed = [32,28,45,41,55,20,38];
+  const failed = [4,8,3,7,5,2,6];
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const pad = {top:20,right:20,bottom:30,left:30};
+  const cw=W-pad.left-pad.right, ch=H-pad.top-pad.bottom;
+  const max=70, bw=cw/days.length;
+  ctx.font='11px DM Sans'; ctx.fillStyle='#6b7280';
+  for(let i=0;i<=4;i++) {
+    const y = pad.top + ch - (ch/4*i);
+    ctx.fillText(max/4*i,4,y+4);
+    ctx.strokeStyle='rgba(37,40,48,0.5)'; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke();
+  }
+  days.forEach((d,i) => {
+    const x = pad.left + bw*i;
+    const bpad = bw*0.15;
+    const ph = (passed[i]/max)*ch;
+    const fh = (failed[i]/max)*ch;
+    ctx.fillStyle='rgba(52,211,153,0.7)';
+    ctx.beginPath(); ctx.roundRect(x+bpad, pad.top+ch-ph, (bw-bpad*2)*0.5, ph, [4,4,0,0]); ctx.fill();
+    ctx.fillStyle='rgba(248,113,113,0.7)';
+    ctx.beginPath(); ctx.roundRect(x+bpad+(bw-bpad*2)*0.5+4, pad.top+ch-fh, (bw-bpad*2)*0.5, fh, [4,4,0,0]); ctx.fill();
+    ctx.fillStyle='#6b7280'; ctx.textAlign='center';
+    ctx.fillText(d, x+bw/2, H-8);
+  });
+}
+function drawDonutChart() {
+  const canvas = document.getElementById('donut-chart');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W=canvas.width, H=canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const cx=W/2, cy=H/2, r=Math.min(W,H)/2-20, ir=r*0.55;
+  const slices = [{v:0.80,c:'#34d399'},{v:0.12,c:'#f87171'},{v:0.08,c:'#fbbf24'}];
+  let start = -Math.PI/2;
+  slices.forEach(s => {
+    const end = start + s.v * Math.PI * 2;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,start,end); ctx.closePath();
+    ctx.fillStyle=s.c; ctx.fill();
+    start=end;
+  });
+  ctx.beginPath(); ctx.arc(cx,cy,ir,0,Math.PI*2); ctx.fillStyle='#111318'; ctx.fill();
+  ctx.fillStyle='#e8eaf0'; ctx.font='bold 20px Syne'; ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('80%',cx,cy-8);
+  ctx.font='11px DM Sans'; ctx.fillStyle='#6b7280'; ctx.fillText('Pass Rate',cx,cy+12);
+}
+function refreshDashboard() {
+  const pass = Math.floor(Math.random()*100+150);
+  const fail = Math.floor(Math.random()*60+20);
+  document.getElementById('dash-total').textContent = pass+fail;
+  document.getElementById('dash-pass').textContent = pass;
+  document.getElementById('dash-fail').textContent = fail;
+  drawBarChart(); drawDonutChart();
+  showToast('Dashboard refreshed!','success');
+}
+</script>
+</body>
+</html>
