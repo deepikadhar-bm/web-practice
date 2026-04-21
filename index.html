@@ -937,8 +937,8 @@
     </button>
     <div class="notif-panel" id="notif-panel">
       <div class="notif-header"><span>Notifications</span><span style="color:var(--accent);font-size:12px;cursor:pointer;" onclick="markAllRead()">Mark all read</span></div>
-      <div class="notif-item"><div class="notif-dot"></div><div><div class="notif-text">New test case added to your suite</div><div class="notif-time">2 min ago</div></div></div>
-      <div class="notif-item"><div class="notif-dot"></div><div><div class="notif-text">Build #47 passed successfully ✓</div><div class="notif-time">15 min ago</div></div></div>
+      <div class="notif-item" onclick="markNotifRead(this)"><div class="notif-dot"></div><div><div class="notif-text">New test case added to your suite</div><div class="notif-time">2 min ago</div></div></div>
+      <div class="notif-item" onclick="markNotifRead(this)"><div class="notif-dot"></div><div><div class="notif-text">Build #47 passed successfully ✓</div><div class="notif-time">15 min ago</div></div></div>
       <div class="notif-item" style="opacity:0.5"><div style="width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;margin-top:4px;"></div><div><div class="notif-text">Scheduled maintenance tonight at 2AM</div><div class="notif-time">1 hour ago</div></div></div>
     </div>
   </div>
@@ -1233,7 +1233,7 @@
             </div>
             <div style="display:flex;gap:10px;margin-top:8px">
               <button class="btn btn-primary" onclick="saveProfile()" data-testid="save-profile">Save Changes</button>
-              <button class="btn btn-secondary" onclick="showToast('Changes discarded','warning')" data-testid="discard-profile">Discard</button>
+              <button class="btn btn-secondary" onclick="discardProfile()" data-testid="discard-profile">Discard</button>
             </div>
           </div>
         </div>
@@ -1257,7 +1257,7 @@
               <div class="progress-bar"><div class="progress-fill" id="pass-strength" style="width:0%"></div></div>
               <div style="font-size:12px;color:var(--text-muted);margin-top:6px" id="pass-strength-label">Enter a password</div>
             </div>
-            <button class="btn btn-outline" onclick="showToast('Password changed successfully!','success')" data-testid="change-pass-btn">Update Password</button>
+            <button class="btn btn-outline" onclick="updatePassword()" data-testid="change-pass-btn">Update Password</button>
           </div>
           <div class="card">
             <div class="card-title"><div class="icon" style="background:rgba(248,113,113,0.15)">⚠️</div>Danger Zone</div>
@@ -1898,7 +1898,7 @@
     <div class="form-group"><label>Notes</label><textarea placeholder="Add notes..." data-testid="modal-notes" rows="3"></textarea></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('form-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="closeModal('form-modal');showToast('Item added successfully!','success')" data-testid="modal-submit">Add Item</button>
+      <button class="btn btn-primary" onclick="submitFormModal()" data-testid="modal-submit">Add Item</button>
     </div>
   </div>
 </div>
@@ -1939,7 +1939,7 @@
     <div class="form-group"><label>Email</label><input type="email" placeholder="your@email.com" data-testid="forgot-email"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('forgot-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="closeModal('forgot-modal');showToast('Reset email sent! Check your inbox','success')" data-testid="send-reset">Send Reset Link</button>
+      <button class="btn btn-primary" onclick="submitForgotPassword()" data-testid="send-reset">Send Reset Link</button>
     </div>
   </div>
 </div>
@@ -1954,6 +1954,22 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('add-tc-modal')">Cancel</button>
       <button class="btn btn-primary" onclick="addTableRow();closeModal('add-tc-modal')" data-testid="save-tc">Save Test Case</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit TC Modal -->
+<div class="modal-overlay" id="edit-tc-modal" onclick="closeModalOutside(event,'edit-tc-modal')">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title">✏️ Edit Test Case</div><button class="modal-close" onclick="closeModal('edit-tc-modal')">✕</button></div>
+    <input type="hidden" id="edit-tc-id">
+    <div class="form-group"><label>Test Case Name</label><input type="text" id="edit-tc-name" placeholder="e.g. Verify login button" data-testid="edit-tc-name"></div>
+    <div class="form-group"><label>Suite</label><select id="edit-tc-suite" data-testid="edit-tc-suite"><option>Login Suite</option><option>Registration Suite</option><option>Checkout Suite</option><option>Dashboard Suite</option></select></div>
+    <div class="form-group"><label>Status</label><select id="edit-tc-status" data-testid="edit-tc-status"><option value="passed">Passed</option><option value="failed">Failed</option><option value="pending">Pending</option><option value="running">Running</option></select></div>
+    <div class="form-group"><label>Duration</label><input type="text" id="edit-tc-duration" placeholder="e.g. 1.2s" data-testid="edit-tc-duration"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('edit-tc-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditRow()" data-testid="save-edit-tc">Save Changes</button>
     </div>
   </div>
 </div>
@@ -1988,7 +2004,7 @@ function showPage(name) {
   if(name==='dashboard') initCharts();
   if(name==='tables') initTable();
   if(name==='shop') renderProducts();
-  if(name==='checkout') initReview();
+  if(name==='checkout') resetCheckout();
 }
 
 // ── TABS ──
@@ -2020,7 +2036,32 @@ function openModal(id) { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 function closeModalOutside(e, id) { if(e.target.id===id) closeModal(id); }
 function showForgotModal() { openModal('forgot-modal'); }
-function markAllRead() { closeNotif(); showToast('All notifications marked as read','success'); }
+function submitForgotPassword() {
+  const email = document.querySelector('#forgot-modal [data-testid="forgot-email"]').value.trim();
+  if(!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('Please enter a valid email address','warning'); return;
+  }
+  closeModal('forgot-modal');
+  showToast('Reset email sent! Check your inbox','success');
+}
+function submitFormModal() {
+  const name = document.querySelector('#form-modal [data-testid="modal-name"]').value.trim();
+  if(!name) { showToast('Name is required','warning'); return; }
+  closeModal('form-modal');
+  showToast('Item added successfully!','success');
+}
+function markAllRead() {
+  document.querySelectorAll('#notif-panel .notif-dot').forEach(d => d.style.background = 'var(--border)');
+  const indicator = document.querySelector('#notif-btn span');
+  if(indicator) indicator.style.display = 'none';
+  closeNotif();
+  showToast('All notifications marked as read','success');
+}
+function markNotifRead(item) {
+  const dot = item.querySelector('.notif-dot');
+  if(dot) dot.style.background = 'var(--border)';
+  item.style.opacity = '0.5';
+}
 
 // ── NOTIFICATIONS ──
 function toggleNotif() {
@@ -2068,6 +2109,9 @@ function submitRegistration() {
   if(pass.length < 8) { errMsg.textContent='Password must be at least 8 characters'; errEl.style.display='flex'; return; }
   if(pass !== cpass) { errMsg.textContent='Passwords do not match'; errEl.style.display='flex'; return; }
   if(!terms) { errMsg.textContent='You must accept the Terms of Service'; errEl.style.display='flex'; return; }
+  const users = JSON.parse(localStorage.getItem('tc_users') || '[]');
+  if(!users.find(u => u.email === email)) users.push({email, password: pass});
+  localStorage.setItem('tc_users', JSON.stringify(users));
   successEl.style.display='flex';
   showToast('Account created! Welcome aboard 🎉','success');
   setTimeout(() => { showPage('forms'); switchTab('form-tabs','form-login',document.querySelector('#form-tabs .tab-btn:nth-child(2)')); }, 2000);
@@ -2078,7 +2122,16 @@ function submitLogin() {
   const pass = document.getElementById('login-pass').value;
   const errEl = document.getElementById('login-error');
   errEl.style.display = 'none';
-  if(email === 'test@example.com' && pass === 'Test@1234') {
+  if(!email || !pass) { errEl.style.display = 'flex'; return; }
+  const users = JSON.parse(localStorage.getItem('tc_users') || '[]');
+  const isDefault = email === 'test@example.com' && pass === 'Test@1234';
+  const isRegistered = users.find(u => u.email === email && u.password === pass);
+  if(isDefault || isRegistered) {
+    if(document.getElementById('remember-me').checked) {
+      localStorage.setItem('tc_remembered_email', email);
+    } else {
+      localStorage.removeItem('tc_remembered_email');
+    }
     showToast('Login successful! Welcome back 👋','success');
     setTimeout(() => showPage('dashboard'), 1000);
   } else {
@@ -2086,8 +2139,55 @@ function submitLogin() {
   }
 }
 
+function loadProfile() {
+  try {
+    const p = JSON.parse(localStorage.getItem('tc_profile') || 'null');
+    if(!p) return;
+    if(p.name !== undefined) document.getElementById('prof-name').value = p.name;
+    if(p.bio !== undefined) document.getElementById('prof-bio').value = p.bio;
+    if(p.url !== undefined) document.getElementById('prof-url').value = p.url;
+    if(p.dob !== undefined) document.getElementById('prof-dob').value = p.dob;
+    if(p.gender !== undefined) document.getElementById('prof-gender').value = p.gender;
+    if(p.color !== undefined) document.getElementById('prof-color').value = p.color;
+    if(p.notifEmail !== undefined) document.getElementById('notif-email').checked = p.notifEmail;
+    if(p.notifPush !== undefined) document.getElementById('notif-push').checked = p.notifPush;
+    if(p.notifDigest !== undefined) document.getElementById('notif-digest').checked = p.notifDigest;
+  } catch(e) {}
+}
 function saveProfile() {
+  const profile = {
+    name: document.getElementById('prof-name').value,
+    bio: document.getElementById('prof-bio').value,
+    url: document.getElementById('prof-url').value,
+    dob: document.getElementById('prof-dob').value,
+    gender: document.getElementById('prof-gender').value,
+    color: document.getElementById('prof-color').value,
+    notifEmail: document.getElementById('notif-email').checked,
+    notifPush: document.getElementById('notif-push').checked,
+    notifDigest: document.getElementById('notif-digest').checked,
+  };
+  localStorage.setItem('tc_profile', JSON.stringify(profile));
   showToast('Profile saved successfully!','success');
+}
+function discardProfile() {
+  loadProfile();
+  showToast('Changes discarded','warning');
+}
+function updatePassword() {
+  const currentPassEl = document.querySelector('[data-testid="current-pass"]');
+  const newPass = document.getElementById('new-pass').value;
+  const confirmPass = document.getElementById('confirm-new-pass').value;
+  if(!currentPassEl.value) { showToast('Enter your current password','warning'); return; }
+  if(newPass.length < 8) { showToast('New password must be at least 8 characters','warning'); return; }
+  if(newPass !== confirmPass) { showToast('Passwords do not match','error'); return; }
+  const bar = document.getElementById('pass-strength');
+  const label = document.getElementById('pass-strength-label');
+  currentPassEl.value = '';
+  document.getElementById('new-pass').value = '';
+  document.getElementById('confirm-new-pass').value = '';
+  if(bar) bar.style.width = '0%';
+  if(label) label.textContent = 'Enter a password';
+  showToast('Password changed successfully!','success');
 }
 
 // Password strength
@@ -2108,6 +2208,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if(bar) { bar.style.width = pcts[strength]+'%'; bar.style.background = colors[strength]; }
     if(label) { label.textContent = labels[strength]; label.style.color = colors[strength]; }
   });
+
+  // Load persisted profile
+  loadProfile();
+
+  // Remember me auto-fill
+  const remembered = localStorage.getItem('tc_remembered_email');
+  const loginEmail = document.getElementById('login-email');
+  const rememberMe = document.getElementById('remember-me');
+  if(remembered && loginEmail) { loginEmail.value = remembered; if(rememberMe) rememberMe.checked = true; }
+
+  // Notification items mark-as-read on click
+  document.querySelectorAll('#notif-panel .notif-item').forEach(item => {
+    item.addEventListener('click', () => markNotifRead(item));
+  });
+
   initCalendar();
   initTable();
 });
@@ -2245,8 +2360,17 @@ const tableData = [
   {id:'TC-012',name:'Filter by status',suite:'Dashboard Suite',status:'pending',duration:'—'},
 ];
 
-let tableDataCurrent = [...tableData];
-function initTable() { renderTable(); }
+function loadTableData() {
+  try {
+    const saved = localStorage.getItem('tc_tableData');
+    return saved ? JSON.parse(saved) : [...tableData];
+  } catch(e) { return [...tableData]; }
+}
+function saveTableData() {
+  localStorage.setItem('tc_tableData', JSON.stringify(tableDataCurrent));
+}
+let tableDataCurrent = loadTableData();
+function initTable() { tableDataCurrent = loadTableData(); renderTable(); }
 function renderTable() {
   const search = (document.getElementById('table-search')||{}).value||'';
   const statusF = (document.getElementById('status-filter')||{}).value||'';
@@ -2267,7 +2391,7 @@ function renderTable() {
       <td><span class="status-badge ${statusBadge[r.status]}">${statusIcon[r.status]} ${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span></td>
       <td style="font-family:'JetBrains Mono';font-size:13px">${r.duration}</td>
       <td><div style="display:flex;gap:6px">
-        <button class="btn btn-sm btn-secondary" onclick="showToast('Running ${r.id}...','info')" data-testid="run-${r.id}">▶</button>
+        <button class="btn btn-sm btn-secondary" onclick="runRow('${r.id}')" data-testid="run-${r.id}">▶</button>
         <button class="btn btn-sm btn-outline" onclick="editRow('${r.id}')" data-testid="edit-${r.id}">✏️</button>
         <button class="btn btn-sm btn-danger" onclick="deleteRow('${r.id}')" data-testid="delete-${r.id}">🗑</button>
       </div></td>
@@ -2293,24 +2417,77 @@ function updateBulk() {
   const sc = document.getElementById('selected-count');
   if(sc) sc.textContent = `${n} selected`;
 }
+function runRow(id) {
+  const row = tableDataCurrent.find(r => r.id === id);
+  if(!row || row.status === 'running') return;
+  row.status = 'running'; row.duration = '...';
+  saveTableData(); renderTable();
+  showToast(`Running ${id}...`,'info');
+  const delay = 1500 + Math.random() * 2000;
+  setTimeout(() => {
+    const r = tableDataCurrent.find(r => r.id === id);
+    if(!r) return;
+    r.status = Math.random() > 0.25 ? 'passed' : 'failed';
+    r.duration = (Math.random() * 4 + 0.4).toFixed(1) + 's';
+    saveTableData(); renderTable();
+    showToast(`${id} ${r.status}!`, r.status === 'passed' ? 'success' : 'error');
+  }, delay);
+}
 function bulkAction(action) {
-  const icons = {run:'▶ Running selected...', archive:'📦 Archived selected', delete:'🗑 Deleted selected'};
-  showToast(icons[action],'info');
+  const checkedIds = [...document.querySelectorAll('.row-check:checked')]
+    .map(c => c.closest('tr').dataset.id);
+  if(!checkedIds.length) return;
+  if(action === 'delete') {
+    tableDataCurrent = tableDataCurrent.filter(r => !checkedIds.includes(r.id));
+    saveTableData(); renderTable();
+    showToast(`🗑 Deleted ${checkedIds.length} row${checkedIds.length>1?'s':''}`, 'error');
+  } else if(action === 'run') {
+    checkedIds.forEach(id => runRow(id));
+    showToast(`▶ Running ${checkedIds.length} test${checkedIds.length>1?'s':''}...`,'info');
+  } else if(action === 'archive') {
+    tableDataCurrent = tableDataCurrent.filter(r => !checkedIds.includes(r.id));
+    saveTableData(); renderTable();
+    showToast(`📦 Archived ${checkedIds.length} row${checkedIds.length>1?'s':''}`, 'info');
+  }
   document.querySelectorAll('.row-check').forEach(c => c.checked=false);
   document.getElementById('select-all').checked=false;
   updateBulk();
 }
 function deleteRow(id) {
   tableDataCurrent = tableDataCurrent.filter(r => r.id !== id);
+  saveTableData();
   renderTable();
   showToast(`${id} deleted`,'error');
 }
-function editRow(id) { showToast(`Editing ${id}`,'info'); }
+function editRow(id) {
+  const row = tableDataCurrent.find(r => r.id === id);
+  if(!row) return;
+  document.getElementById('edit-tc-id').value = id;
+  document.getElementById('edit-tc-name').value = row.name;
+  document.getElementById('edit-tc-suite').value = row.suite;
+  document.getElementById('edit-tc-status').value = row.status;
+  document.getElementById('edit-tc-duration').value = row.duration;
+  openModal('edit-tc-modal');
+}
+function saveEditRow() {
+  const id = document.getElementById('edit-tc-id').value;
+  const row = tableDataCurrent.find(r => r.id === id);
+  if(!row) return;
+  row.name = document.getElementById('edit-tc-name').value || row.name;
+  row.suite = document.getElementById('edit-tc-suite').value;
+  row.status = document.getElementById('edit-tc-status').value;
+  row.duration = document.getElementById('edit-tc-duration').value || row.duration;
+  saveTableData();
+  renderTable();
+  closeModal('edit-tc-modal');
+  showToast(`${id} updated!`, 'success');
+}
 function addTableRow() {
   const name = document.getElementById('new-tc-name').value || 'New Test Case';
   const suite = document.getElementById('new-tc-suite').value;
   const id = 'TC-' + String(tableDataCurrent.length+1).padStart(3,'0');
   tableDataCurrent.push({id,name,suite,status:'pending',duration:'—'});
+  saveTableData();
   renderTable();
   showToast(`${id} added!`,'success');
 }
@@ -2387,6 +2564,25 @@ function updateCartUI() {
 // ── CHECKOUT ──
 let checkoutStep = 1;
 let couponDiscount = 0;
+function resetCheckout() {
+  [1,2,3,4].forEach(i => {
+    const s = document.getElementById('step-'+i);
+    if(s) { s.classList.remove('active','done'); }
+    const c = document.getElementById('checkout-step-'+i);
+    if(c) c.style.display = 'none';
+  });
+  const s1 = document.getElementById('step-1');
+  if(s1) s1.classList.add('active');
+  const c1 = document.getElementById('checkout-step-1');
+  if(c1) c1.style.display = 'block';
+  checkoutStep = 1;
+  couponDiscount = 0;
+  const couponInput = document.getElementById('coupon-input');
+  if(couponInput) couponInput.value = '';
+  const couponMsg = document.getElementById('coupon-msg');
+  if(couponMsg) couponMsg.textContent = '';
+  initReview();
+}
 function checkoutNext(step) {
   if(step===1) {
     const fname = document.getElementById('sh-fname').value;
@@ -2401,6 +2597,9 @@ function checkoutNext(step) {
     const id = '#TC-' + Math.floor(Math.random()*90000+10000);
     document.getElementById('order-id').textContent = id;
     showToast('Order placed successfully! 🎉','success');
+    cart = [];
+    couponDiscount = 0;
+    updateCartUI();
   }
   document.getElementById('checkout-step-'+step).style.display='none';
   document.getElementById('step-'+step).classList.add('done');
