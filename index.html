@@ -770,18 +770,153 @@
   .font-mono { font-family: 'JetBrains Mono'; }
   .w-full { width: 100%; }
 
+  /* ── HAMBURGER BUTTON ── */
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    width: 40px; height: 40px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .nav-hamburger span {
+    display: block;
+    width: 18px; height: 2px;
+    background: var(--text);
+    border-radius: 2px;
+    transition: all 0.25s;
+  }
+  .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+  .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* ── MOBILE MENU DRAWER ── */
+  .mobile-menu {
+    display: none;
+    position: fixed;
+    top: 60px; left: 0; right: 0;
+    background: rgba(240,244,248,0.98);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    z-index: 99;
+    flex-direction: column;
+    padding: 12px 16px 20px;
+    gap: 4px;
+    animation: slideDown 0.25s ease;
+  }
+  @keyframes slideDown { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+  .mobile-menu.open { display: flex; }
+  .mobile-menu a {
+    display: flex; align-items: center;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 15px; font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    cursor: pointer;
+    border: none; background: none;
+    transition: all 0.2s;
+    width: 100%; text-align: left;
+  }
+  .mobile-menu a:hover, .mobile-menu a.active {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  /* ── RESPONSIVE BREAKPOINTS ── */
+  @media (max-width: 900px) {
+    .grid-3 { grid-template-columns: 1fr 1fr; }
+  }
+
   @media (max-width: 768px) {
+    /* Nav */
+    nav a:not(.always-show) { display: none; }
+    .nav-hamburger { display: flex; }
+
+    /* Layout */
     .grid-2, .grid-3 { grid-template-columns: 1fr; }
     .layout-sidebar { grid-template-columns: 1fr; }
-    .hero { padding: 48px 24px 40px; }
-    nav a { display: none; }
-    nav a.always-show { display: flex; }
+    .sidebar { position: static; }
+
+    /* Hero */
+    .hero { padding: 48px 20px 40px; }
+    .hero h1 { letter-spacing: -1px; }
+
+    /* Container */
+    .container { padding: 0 16px 48px; }
+
+    /* Stat cards */
+    .stat-value { font-size: 28px; }
+
+    /* Tables */
+    .table-wrap { font-size: 13px; }
+    th, td { padding: 10px 12px; }
+
+    /* Toast */
+    #toast-container { top: 70px; right: 12px; left: 12px; }
+    .toast { min-width: unset; width: 100%; }
+
+    /* Stepper */
+    .stepper { gap: 0; }
+    .step-label { font-size: 10px; }
+
+    /* Tabs */
+    .tabs { overflow-x: auto; flex-wrap: nowrap; gap: 0; }
+    .tab-btn { white-space: nowrap; padding: 10px 14px; font-size: 13px; }
+
+    /* Modal */
+    .modal { padding: 24px 18px; width: 94%; }
+
+    /* Product grid */
+    .product-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+
+    /* Calendar */
+    .cal-day { font-size: 12px; }
+
+    /* Notification panel */
+    .notif-panel { width: 280px; right: -8px; }
+
+    /* Buttons in hero */
+    .hero .btn { width: 100%; justify-content: center; }
+
+    /* Card padding */
+    .card { padding: 18px; }
+  }
+
+  @media (max-width: 480px) {
+    nav { padding: 0 14px; }
+    .nav-brand { font-size: 17px; }
+    .hero { padding: 40px 16px 32px; }
+    .container { padding: 0 12px 40px; }
+    .product-grid { grid-template-columns: 1fr 1fr; }
+    .modal { width: 98%; padding: 20px 14px; }
+    .stepper { gap: 0; }
+    .step-label { display: none; }
+    .btn { font-size: 13px; padding: 10px 18px; }
+    .notif-panel { width: calc(100vw - 24px); right: -48px; }
   }
 </style>
 </head>
 <body>
 
 <div id="toast-container"></div>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobile-menu">
+  <a onclick="showPage('home');closeMobileMenu()" data-page-mobile="home" class="active">🏠 Home</a>
+  <a onclick="showPage('forms');closeMobileMenu()" data-page-mobile="forms">📝 Forms</a>
+  <a onclick="showPage('components');closeMobileMenu()" data-page-mobile="components">🧩 Components</a>
+  <a onclick="showPage('tables');closeMobileMenu()" data-page-mobile="tables">📊 Tables</a>
+  <a onclick="showPage('shop');closeMobileMenu()" data-page-mobile="shop">🛍 Shop</a>
+  <a onclick="showPage('checkout');closeMobileMenu()" data-page-mobile="checkout">💳 Checkout</a>
+  <a onclick="showPage('dashboard');closeMobileMenu()" data-page-mobile="dashboard">📈 Dashboard</a>
+</div>
 
 <!-- NAV -->
 <nav id="main-nav">
@@ -807,6 +942,11 @@
       <div class="notif-item" style="opacity:0.5"><div style="width:8px;height:8px;border-radius:50%;background:var(--border);flex-shrink:0;margin-top:4px;"></div><div><div class="notif-text">Scheduled maintenance tonight at 2AM</div><div class="notif-time">1 hour ago</div></div></div>
     </div>
   </div>
+
+  <!-- Hamburger button (mobile only) -->
+  <button class="nav-hamburger" id="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
 <!-- ══════════════════════════════════════════════════════ -->
@@ -1822,6 +1962,18 @@
 <!-- JAVASCRIPT -->
 <!-- ══════════════════════════════════════════════════════ -->
 <script>
+// ── MOBILE MENU ──
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobile-menu');
+  const btn = document.getElementById('nav-hamburger');
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+function closeMobileMenu() {
+  document.getElementById('mobile-menu').classList.remove('open');
+  document.getElementById('nav-hamburger').classList.remove('open');
+}
+
 // ── PAGE NAVIGATION ──
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1829,6 +1981,9 @@ function showPage(name) {
   document.querySelectorAll('nav a[data-page]').forEach(a => a.classList.remove('active'));
   const link = document.querySelector(`nav a[data-page="${name}"]`);
   if(link) link.classList.add('active');
+  document.querySelectorAll('#mobile-menu a[data-page-mobile]').forEach(a => a.classList.remove('active'));
+  const mLink = document.querySelector(`#mobile-menu a[data-page-mobile="${name}"]`);
+  if(mLink) mLink.classList.add('active');
   window.scrollTo(0,0);
   if(name==='dashboard') initCharts();
   if(name==='tables') initTable();
@@ -1874,6 +2029,11 @@ function toggleNotif() {
 }
 function closeNotif() { document.getElementById('notif-panel').classList.remove('open'); }
 document.addEventListener('click', e => {
+  const hamburger = document.getElementById('nav-hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  if(hamburger && mobileMenu && !hamburger.contains(e.target) && !mobileMenu.contains(e.target)) {
+    closeMobileMenu();
+  }
   if(!document.getElementById('notif-btn').contains(e.target)) closeNotif();
 });
 
